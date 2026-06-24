@@ -1,0 +1,41 @@
+import unittest
+
+from fancy_daily import parse_daily_note
+
+
+class DailyParserTests(unittest.TestCase):
+    def test_parses_daily_note_sections(self) -> None:
+        entry = parse_daily_note(
+            """
+            Date: 2026-06-24
+
+            Highlights:
+            - Shipped parser foundation
+            - Wrote tests
+
+            Blockers:
+            - Need CLI next
+
+            Follow-ups:
+            - Add markdown output
+
+            Notes:
+            Keep the format lightweight.
+            """
+        )
+
+        self.assertEqual(entry.date, "2026-06-24")
+        self.assertEqual(entry.highlights, ("Shipped parser foundation", "Wrote tests"))
+        self.assertEqual(entry.blockers, ("Need CLI next",))
+        self.assertEqual(entry.follow_ups, ("Add markdown output",))
+        self.assertEqual(entry.notes, ("Keep the format lightweight.",))
+
+    def test_defaults_unlabeled_lines_to_notes(self) -> None:
+        entry = parse_daily_note("Loose thought\n- Another note")
+
+        self.assertEqual(entry.date, None)
+        self.assertEqual(entry.notes, ("Loose thought", "Another note"))
+
+
+if __name__ == "__main__":
+    unittest.main()
