@@ -11,5 +11,8 @@ requires-python = ">=3.10"
 authors = [{ name = "Vinay Gupta" }]
 dependencies = []
 
+[project.scripts]
+fancy-daily = "fancy_daily.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
