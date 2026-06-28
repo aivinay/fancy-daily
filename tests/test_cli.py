@@ -34,6 +34,27 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["highlights"], ["Added CLI"])
         self.assertEqual(payload["follow_ups"], ["Add markdown rendering"])
 
+    def test_parse_command_outputs_markdown_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-06-28",
+                        "Highlights:",
+                        "- Wired markdown output",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "markdown", str(note)])
+
+        self.assertIn("# 2026-06-28", stdout.getvalue())
+        self.assertIn("- Wired markdown output", stdout.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()
