@@ -22,14 +22,24 @@ def main(argv: Sequence[str] | None = None) -> None:
         default="json",
         help="Output format.",
     )
+    parse.add_argument(
+        "--output",
+        type=Path,
+        help="Write output to a file instead of stdout.",
+    )
 
     args = parser.parse_args(argv)
     if args.command == "parse":
         payload = parse_daily_note(args.note_file.read_text(encoding="utf-8"))
         if args.format == "markdown":
-            print(render_markdown(payload), end="")
+            output = render_markdown(payload)
         else:
-            print(json.dumps(asdict(payload), indent=2, sort_keys=True))
+            output = json.dumps(asdict(payload), indent=2, sort_keys=True) + "\n"
+
+        if args.output:
+            args.output.write_text(output, encoding="utf-8")
+        else:
+            print(output, end="")
 
 
 if __name__ == "__main__":
