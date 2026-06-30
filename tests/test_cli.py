@@ -78,6 +78,29 @@ class CliTests(unittest.TestCase):
         self.assertIn("# 2026-06-29", rendered)
         self.assertIn("- Added file output", rendered)
 
+    def test_parse_command_creates_output_parent_directories(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            note = root / "daily.txt"
+            output = root / "reports" / "daily" / "summary.md"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-06-30",
+                        "Highlights:",
+                        "- Created nested output directories",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            main(["parse", "--format", "markdown", "--output", str(output), str(note)])
+
+            rendered = output.read_text(encoding="utf-8")
+
+        self.assertIn("# 2026-06-30", rendered)
+        self.assertIn("- Created nested output directories", rendered)
+
 
 if __name__ == "__main__":
     unittest.main()
