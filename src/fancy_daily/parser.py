@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
+
+ORDERED_ITEM_RE = re.compile(r"^\d+[.)]\s+")
 
 SECTION_ALIASES = {
     "highlights": "highlights",
@@ -65,4 +68,4 @@ def _clean_item(line: str) -> str:
     for prefix in ("- ", "* "):
         if line.startswith(prefix):
             return line[len(prefix) :].strip()
-    return line
+    return ORDERED_ITEM_RE.sub("", line, count=1).strip()

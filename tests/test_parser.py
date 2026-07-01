@@ -36,6 +36,20 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.date, None)
         self.assertEqual(entry.notes, ("Loose thought", "Another note"))
 
+    def test_cleans_ordered_list_items(self) -> None:
+        entry = parse_daily_note(
+            """
+            Highlights:
+            1. Added ordered list parsing
+            2) Kept parser output stable
+            """
+        )
+
+        self.assertEqual(
+            entry.highlights,
+            ("Added ordered list parsing", "Kept parser output stable"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
