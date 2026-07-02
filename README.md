@@ -1,22 +1,72 @@
 # Fancy Daily
 
-Fancy Daily is a small project for turning everyday notes into structured daily summaries. The goal is to make it easy to capture what happened, identify useful patterns, and produce a clean daily log without heavy process.
+Fancy Daily is a local-first daily note parser and summary helper. It turns a
+plain text daily log into structured JSON or clean Markdown so the same note can
+be used for personal review, weekly summaries, or lightweight status reporting.
 
-## Initial direction
+## Note Format
 
-- Define a simple daily-entry format.
-- Generate readable summaries from plain text notes.
-- Track lightweight signals such as focus areas, blockers, and follow-ups.
-- Keep the tool local-first and easy to run from the command line.
+Daily notes are plain text with optional sections:
 
-## First milestone
+```text
+Date: 2026-07-02
 
-Build a minimal parser that accepts a plain text daily note and returns a structured summary with:
+Highlights:
+- Shipped the markdown renderer
+1. Added CLI output support
 
-- date
-- highlights
-- blockers
-- follow-ups
-- free-form notes
+Blockers:
+- Waiting on design feedback
 
-The project will grow in small increments so each change stays reviewable and useful.
+Follow-ups:
+- Add examples for weekly review
+
+Notes:
+Keep the format easy to write by hand.
+```
+
+Supported sections are:
+
+- `Highlights`, `Highlight`, or `Wins`
+- `Blockers` or `Blocker`
+- `Follow-ups`, `Follow ups`, or `Followups`
+- `Notes` or `Note`
+
+Unlabeled lines are treated as notes. Bullet items using `-`, `*`, `1.`, or
+`1)` are normalized before rendering.
+
+## Usage
+
+Run the parser from a checkout with:
+
+```bash
+PYTHONPATH=src python3 -m fancy_daily.cli parse daily.txt
+```
+
+Render Markdown instead of JSON:
+
+```bash
+PYTHONPATH=src python3 -m fancy_daily.cli parse --format markdown daily.txt
+```
+
+Write output to a file:
+
+```bash
+PYTHONPATH=src python3 -m fancy_daily.cli parse \
+  --format markdown \
+  --output reports/daily/summary.md \
+  daily.txt
+```
+
+Missing parent directories for `--output` are created automatically.
+
+## Development
+
+Run the test suite with:
+
+```bash
+PYTHONPATH=src python3 -m unittest discover -s tests
+```
+
+The project is intentionally growing in small increments so each change stays
+reviewable and useful.
