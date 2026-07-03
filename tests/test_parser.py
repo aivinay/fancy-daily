@@ -50,6 +50,20 @@ class DailyParserTests(unittest.TestCase):
             ("Added ordered list parsing", "Kept parser output stable"),
         )
 
+    def test_accepts_markdown_heading_sections(self) -> None:
+        entry = parse_daily_note(
+            """
+            Date: 2026-07-03
+            ## Highlights
+            - Parsed markdown headings
+            ### Follow-ups:
+            - Document heading support
+            """
+        )
+
+        self.assertEqual(entry.highlights, ("Parsed markdown headings",))
+        self.assertEqual(entry.follow_ups, ("Document heading support",))
+
 
 if __name__ == "__main__":
     unittest.main()

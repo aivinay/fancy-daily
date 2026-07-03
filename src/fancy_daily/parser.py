@@ -48,7 +48,7 @@ def parse_daily_note(text: str) -> DailyEntry:
             date = line.split(":", 1)[1].strip() or None
             continue
 
-        normalized = line.rstrip(":").lower()
+        normalized = _normalize_section_name(line)
         if normalized in SECTION_ALIASES:
             current_section = SECTION_ALIASES[normalized]
             continue
@@ -69,3 +69,7 @@ def _clean_item(line: str) -> str:
         if line.startswith(prefix):
             return line[len(prefix) :].strip()
     return ORDERED_ITEM_RE.sub("", line, count=1).strip()
+
+
+def _normalize_section_name(line: str) -> str:
+    return line.lstrip("#").strip().rstrip(":").lower()
