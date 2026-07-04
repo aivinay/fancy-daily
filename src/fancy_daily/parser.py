@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 
 ORDERED_ITEM_RE = re.compile(r"^\d+[.)]\s+")
+CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s+")
 
 SECTION_ALIASES = {
     "highlights": "highlights",
@@ -67,8 +68,11 @@ def parse_daily_note(text: str) -> DailyEntry:
 def _clean_item(line: str) -> str:
     for prefix in ("- ", "* "):
         if line.startswith(prefix):
-            return line[len(prefix) :].strip()
-    return ORDERED_ITEM_RE.sub("", line, count=1).strip()
+            line = line[len(prefix) :].strip()
+            break
+    else:
+        line = ORDERED_ITEM_RE.sub("", line, count=1).strip()
+    return CHECKBOX_ITEM_RE.sub("", line, count=1).strip()
 
 
 def _normalize_section_name(line: str) -> str:

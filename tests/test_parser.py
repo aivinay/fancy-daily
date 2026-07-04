@@ -64,6 +64,21 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.highlights, ("Parsed markdown headings",))
         self.assertEqual(entry.follow_ups, ("Document heading support",))
 
+    def test_cleans_checkbox_list_items(self) -> None:
+        entry = parse_daily_note(
+            """
+            Follow-ups:
+            - [ ] Write release notes
+            - [x] Ship parser support
+            * [X] Review summary output
+            """
+        )
+
+        self.assertEqual(
+            entry.follow_ups,
+            ("Write release notes", "Ship parser support", "Review summary output"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
