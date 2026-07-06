@@ -49,6 +49,12 @@ def parse_daily_note(text: str) -> DailyEntry:
             date = line.split(":", 1)[1].strip() or None
             continue
 
+        inline_section = _split_inline_section(line)
+        if inline_section is not None:
+            current_section, value = inline_section
+            sections[current_section].append(_clean_item(value))
+            continue
+
         normalized = _normalize_section_name(line)
         if normalized in SECTION_ALIASES:
             current_section = SECTION_ALIASES[normalized]
@@ -77,3 +83,15 @@ def _clean_item(line: str) -> str:
 
 def _normalize_section_name(line: str) -> str:
     return line.lstrip("#").strip().rstrip(":").lower()
+
+
+def _split_inline_section(line: str) -> tuple[str, str] | None:
+    label, separator, value = line.lstrip("#").strip().partition(":")
+    if not separator or not value.strip():
+        return None
+
+    normalized = label.strip().lower()
+    if normalized not in SECTION_ALIASES:
+        return None
+
+    return SECTION_ALIASES[normalized], value.strip()

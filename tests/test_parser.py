@@ -79,6 +79,21 @@ class DailyParserTests(unittest.TestCase):
             ("Write release notes", "Ship parser support", "Review summary output"),
         )
 
+    def test_accepts_inline_section_values(self) -> None:
+        entry = parse_daily_note(
+            """
+            Highlights: Shipped inline labels
+            Blockers: Waiting on fixture review
+            Follow-ups: Document inline label support
+            Notes: Keep single-line notes readable
+            """
+        )
+
+        self.assertEqual(entry.highlights, ("Shipped inline labels",))
+        self.assertEqual(entry.blockers, ("Waiting on fixture review",))
+        self.assertEqual(entry.follow_ups, ("Document inline label support",))
+        self.assertEqual(entry.notes, ("Keep single-line notes readable",))
+
 
 if __name__ == "__main__":
     unittest.main()
