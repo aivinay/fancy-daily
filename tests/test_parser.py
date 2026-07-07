@@ -94,6 +94,22 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.follow_ups, ("Document inline label support",))
         self.assertEqual(entry.notes, ("Keep single-line notes readable",))
 
+    def test_accepts_action_oriented_follow_up_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Follow-up:
+            - Send summary
+            Actions: Open tracking issue
+            Next steps:
+            - Draft tomorrow's plan
+            """
+        )
+
+        self.assertEqual(
+            entry.follow_ups,
+            ("Send summary", "Open tracking issue", "Draft tomorrow's plan"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

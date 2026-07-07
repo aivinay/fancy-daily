@@ -13,9 +13,13 @@ SECTION_ALIASES = {
     "wins": "highlights",
     "blockers": "blockers",
     "blocker": "blockers",
+    "actions": "follow_ups",
+    "action items": "follow_ups",
     "follow-ups": "follow_ups",
+    "follow-up": "follow_ups",
     "follow ups": "follow_ups",
     "followups": "follow_ups",
+    "next steps": "follow_ups",
     "notes": "notes",
     "note": "notes",
 }
