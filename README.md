@@ -18,8 +18,7 @@ Highlights:
 Blockers:
 - Waiting on design feedback
 
-Follow-ups:
-- Add examples for weekly review
+Actions: Add examples for weekly review
 
 Notes:
 Keep the format easy to write by hand.
@@ -29,11 +28,15 @@ Supported sections are:
 
 - `Highlights`, `Highlight`, or `Wins`
 - `Blockers` or `Blocker`
-- `Follow-ups`, `Follow ups`, or `Followups`
+- `Follow-ups`, `Follow-up`, `Follow ups`, `Followups`, `Actions`,
+  `Action items`, or `Next steps`
 - `Notes` or `Note`
 
-Unlabeled lines are treated as notes. Bullet items using `-`, `*`, `1.`, or
-`1)` are normalized before rendering.
+Section labels may be written on their own line or inline with a value, such as
+`Highlights: Finished the parser update`. Unlabeled lines are treated as notes.
+Bullet items using `-`, `*`, `1.`, or `1)` are normalized before rendering.
+Markdown task list markers like `[ ]`, `[x]`, and `[X]` are also removed from
+parsed items.
 
 ## Usage
 
