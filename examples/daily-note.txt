@@ -1,0 +1,17 @@
+Date: 2026-07-09
+
+Highlights:
+- Parsed inline section labels
+1. Documented supported note formats
+
+Blockers:
+- Waiting on weekly review notes
+
+Actions: Add a richer weekly summary example
+
+Next steps:
+- [ ] Try markdown output with this example
+- [x] Keep the parser format readable by hand
+
+Notes:
+This example uses the same plain-text conventions supported by the parser.

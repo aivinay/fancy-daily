@@ -52,6 +52,12 @@ Render Markdown instead of JSON:
 PYTHONPATH=src python3 -m fancy_daily.cli parse --format markdown daily.txt
 ```
 
+Try the included example note:
+
+```bash
+PYTHONPATH=src python3 -m fancy_daily.cli parse --format markdown examples/daily-note.txt
+```
+
 Write output to a file:
 
 ```bash
