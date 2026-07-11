@@ -41,6 +41,11 @@ class MarkdownRendererTests(unittest.TestCase):
 
         self.assertTrue(render_markdown(entry).startswith("# Daily Summary\n"))
 
+    def test_renders_empty_state_without_sections(self) -> None:
+        entry = parse_daily_note("")
+
+        self.assertEqual(render_markdown(entry), "# Daily Summary\n\n_No entries recorded._\n")
+
 
 if __name__ == "__main__":
     unittest.main()

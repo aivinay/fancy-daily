@@ -9,6 +9,11 @@ def render_markdown(entry: DailyEntry) -> str:
     lines.append(f"# {title}")
     lines.append("")
 
+    if not any((entry.highlights, entry.blockers, entry.follow_ups, entry.notes)):
+        lines.append("_No entries recorded._")
+        lines.append("")
+        return "\n".join(lines).rstrip() + "\n"
+
     _append_section(lines, "Highlights", entry.highlights)
     _append_section(lines, "Blockers", entry.blockers)
     _append_section(lines, "Follow-ups", entry.follow_ups)
