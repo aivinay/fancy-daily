@@ -55,6 +55,17 @@ class CliTests(unittest.TestCase):
         self.assertIn("# 2026-06-28", stdout.getvalue())
         self.assertIn("- Wired markdown output", stdout.getvalue())
 
+    def test_parse_command_outputs_empty_markdown_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text("Date: 2026-07-12\n", encoding="utf-8")
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "markdown", str(note)])
+
+        self.assertEqual(stdout.getvalue(), "# 2026-07-12\n\n_No entries recorded._\n")
+
     def test_parse_command_writes_output_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
