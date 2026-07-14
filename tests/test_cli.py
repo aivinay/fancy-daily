@@ -34,6 +34,27 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["highlights"], ["Added CLI"])
         self.assertEqual(payload["follow_ups"], ["Add markdown rendering"])
 
+    def test_parse_command_outputs_empty_json_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text("Date: 2026-07-14\n", encoding="utf-8")
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", str(note)])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(
+            payload,
+            {
+                "date": "2026-07-14",
+                "blockers": [],
+                "follow_ups": [],
+                "highlights": [],
+                "notes": [],
+            },
+        )
+
     def test_parse_command_outputs_markdown_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"
