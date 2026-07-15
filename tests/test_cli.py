@@ -110,6 +110,30 @@ class CliTests(unittest.TestCase):
         self.assertIn("# 2026-06-29", rendered)
         self.assertIn("- Added file output", rendered)
 
+    def test_parse_command_writes_json_output_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            note = root / "daily.txt"
+            output = root / "summary.json"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-07-15",
+                        "Blockers:",
+                        "- Waiting on review",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            main(["parse", "--output", str(output), str(note)])
+
+            payload = json.loads(output.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["date"], "2026-07-15")
+        self.assertEqual(payload["blockers"], ["Waiting on review"])
+        self.assertEqual(payload["highlights"], [])
+
     def test_parse_command_creates_output_parent_directories(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
