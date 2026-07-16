@@ -9,6 +9,14 @@ from fancy_daily.cli import main
 
 
 class CliTests(unittest.TestCase):
+    def test_parse_command_outputs_version(self) -> None:
+        stdout = io.StringIO()
+        with self.assertRaises(SystemExit) as raised, redirect_stdout(stdout):
+            main(["--version"])
+
+        self.assertEqual(raised.exception.code, 0)
+        self.assertEqual(stdout.getvalue(), "fancy-daily 0.1.0\n")
+
     def test_parse_command_outputs_json_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

@@ -6,12 +6,18 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Sequence
 
+from . import __version__
 from .parser import parse_daily_note
 from .renderer import render_markdown
 
 
 def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="fancy-daily")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     parse = subparsers.add_parser("parse", help="Parse a daily note.")
