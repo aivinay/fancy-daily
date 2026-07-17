@@ -29,7 +29,7 @@ Supported sections are:
 - `Highlights`, `Highlight`, or `Wins`
 - `Blockers` or `Blocker`
 - `Follow-ups`, `Follow-up`, `Follow ups`, `Followups`, `Actions`,
-  `Action items`, or `Next steps`
+  `Action items`, `Next steps`, `Tasks`, `Task`, `To do`, `Todo`, or `Todos`
 - `Notes` or `Note`
 
 Section labels may be written on their own line or inline with a value, such as

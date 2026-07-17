@@ -110,6 +110,22 @@ class DailyParserTests(unittest.TestCase):
             ("Send summary", "Open tracking issue", "Draft tomorrow's plan"),
         )
 
+    def test_accepts_task_oriented_follow_up_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Tasks:
+            - Prepare demo
+            To do: Update checklist
+            Todos:
+            - Share notes
+            """
+        )
+
+        self.assertEqual(
+            entry.follow_ups,
+            ("Prepare demo", "Update checklist", "Share notes"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

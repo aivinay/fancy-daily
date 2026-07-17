@@ -20,6 +20,11 @@ SECTION_ALIASES = {
     "follow ups": "follow_ups",
     "followups": "follow_ups",
     "next steps": "follow_ups",
+    "task": "follow_ups",
+    "tasks": "follow_ups",
+    "to do": "follow_ups",
+    "todo": "follow_ups",
+    "todos": "follow_ups",
     "notes": "notes",
     "note": "notes",
 }
