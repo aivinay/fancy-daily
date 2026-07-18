@@ -126,6 +126,20 @@ class DailyParserTests(unittest.TestCase):
             ("Prepare demo", "Update checklist", "Share notes"),
         )
 
+    def test_accepts_accomplishment_highlight_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Accomplishments:
+            - Finished parser cleanup
+            Done: Published summary
+            """
+        )
+
+        self.assertEqual(
+            entry.highlights,
+            ("Finished parser cleanup", "Published summary"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

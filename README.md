@@ -26,7 +26,8 @@ Keep the format easy to write by hand.
 
 Supported sections are:
 
-- `Highlights`, `Highlight`, or `Wins`
+- `Highlights`, `Highlight`, `Wins`, `Accomplishments`, `Accomplishment`, or
+  `Done`
 - `Blockers` or `Blocker`
 - `Follow-ups`, `Follow-up`, `Follow ups`, `Followups`, `Actions`,
   `Action items`, `Next steps`, `Tasks`, `Task`, `To do`, `Todo`, or `Todos`

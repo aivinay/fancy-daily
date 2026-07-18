@@ -8,6 +8,9 @@ ORDERED_ITEM_RE = re.compile(r"^\d+[.)]\s+")
 CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s+")
 
 SECTION_ALIASES = {
+    "accomplishment": "highlights",
+    "accomplishments": "highlights",
+    "done": "highlights",
     "highlights": "highlights",
     "highlight": "highlights",
     "wins": "highlights",
