@@ -28,7 +28,7 @@ Supported sections are:
 
 - `Highlights`, `Highlight`, `Wins`, `Accomplishments`, `Accomplishment`, or
   `Done`
-- `Blockers` or `Blocker`
+- `Blockers`, `Blocker`, `Risks`, `Risk`, `Issues`, or `Issue`
 - `Follow-ups`, `Follow-up`, `Follow ups`, `Followups`, `Actions`,
   `Action items`, `Next steps`, `Tasks`, `Task`, `To do`, `Todo`, or `Todos`
 - `Notes` or `Note`

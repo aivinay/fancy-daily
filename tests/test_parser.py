@@ -140,6 +140,20 @@ class DailyParserTests(unittest.TestCase):
             ("Finished parser cleanup", "Published summary"),
         )
 
+    def test_accepts_risk_and_issue_blocker_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Risks:
+            - Review window is tight
+            Issue: Waiting on fixture data
+            """
+        )
+
+        self.assertEqual(
+            entry.blockers,
+            ("Review window is tight", "Waiting on fixture data"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
