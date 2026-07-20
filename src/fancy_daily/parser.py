@@ -34,6 +34,10 @@ SECTION_ALIASES = {
     "todos": "follow_ups",
     "notes": "notes",
     "note": "notes",
+    "reflection": "notes",
+    "reflections": "notes",
+    "thought": "notes",
+    "thoughts": "notes",
 }
 
 

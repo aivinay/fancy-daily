@@ -154,6 +154,20 @@ class DailyParserTests(unittest.TestCase):
             ("Review window is tight", "Waiting on fixture data"),
         )
 
+    def test_accepts_reflection_and_thought_note_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Reflections:
+            - The review loop is getting clearer
+            Thought: Keep tomorrow's slice small
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            ("The review loop is getting clearer", "Keep tomorrow's slice small"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
