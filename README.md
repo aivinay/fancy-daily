@@ -35,6 +35,8 @@ Supported sections are:
 
 Section labels may be written on their own line or inline with a value, such as
 `Highlights: Finished the parser update`. Unlabeled lines are treated as notes.
+Dates may be written as `Date: 2026-07-02` or as a Markdown heading such as
+`# 2026-07-02`.
 Bullet items using `-`, `*`, `1.`, or `1)` are normalized before rendering.
 Markdown task list markers like `[ ]`, `[x]`, and `[X]` are also removed from
 parsed items.

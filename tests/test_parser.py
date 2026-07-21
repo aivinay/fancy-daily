@@ -64,6 +64,19 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.highlights, ("Parsed markdown headings",))
         self.assertEqual(entry.follow_ups, ("Document heading support",))
 
+    def test_accepts_markdown_date_heading(self) -> None:
+        entry = parse_daily_note(
+            """
+            # 2026-07-21
+
+            ## Highlights
+            - Parsed heading date
+            """
+        )
+
+        self.assertEqual(entry.date, "2026-07-21")
+        self.assertEqual(entry.highlights, ("Parsed heading date",))
+
     def test_cleans_checkbox_list_items(self) -> None:
         entry = parse_daily_note(
             """
