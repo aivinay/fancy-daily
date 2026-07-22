@@ -77,6 +77,19 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.date, "2026-07-21")
         self.assertEqual(entry.highlights, ("Parsed heading date",))
 
+    def test_accepts_plain_date_line(self) -> None:
+        entry = parse_daily_note(
+            """
+            2026-07-22
+
+            Highlights:
+            - Parsed plain date line
+            """
+        )
+
+        self.assertEqual(entry.date, "2026-07-22")
+        self.assertEqual(entry.highlights, ("Parsed plain date line",))
+
     def test_cleans_checkbox_list_items(self) -> None:
         entry = parse_daily_note(
             """
