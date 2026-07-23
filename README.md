@@ -67,6 +67,12 @@ Try the included example note:
 PYTHONPATH=src python3 -m fancy_daily.cli parse --format markdown examples/daily-note.txt
 ```
 
+Pipe a note through standard input by using `-` as the file path:
+
+```bash
+cat daily.txt | PYTHONPATH=src python3 -m fancy_daily.cli parse -
+```
+
 Write output to a file:
 
 ```bash

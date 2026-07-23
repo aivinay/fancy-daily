@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from fancy_daily.cli import main
 
@@ -41,6 +42,25 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["date"], "2026-06-25")
         self.assertEqual(payload["highlights"], ["Added CLI"])
         self.assertEqual(payload["follow_ups"], ["Add markdown rendering"])
+
+    def test_parse_command_reads_stdin_for_dash_path(self) -> None:
+        stdout = io.StringIO()
+        stdin = io.StringIO(
+            "\n".join(
+                [
+                    "Date: 2026-07-23",
+                    "Highlights:",
+                    "- Parsed piped input",
+                ]
+            )
+        )
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse", "-"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["date"], "2026-07-23")
+        self.assertEqual(payload["highlights"], ["Parsed piped input"])
 
     def test_parse_command_outputs_empty_json_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

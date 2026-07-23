@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import asdict
 from pathlib import Path
 from typing import Sequence
@@ -21,7 +22,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     parse = subparsers.add_parser("parse", help="Parse a daily note.")
-    parse.add_argument("note_file", type=Path)
+    parse.add_argument("note_file", help="Path to a note file, or '-' for stdin.")
     parse.add_argument(
         "--format",
         choices=("json", "markdown"),
@@ -36,7 +37,12 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     args = parser.parse_args(argv)
     if args.command == "parse":
-        payload = parse_daily_note(args.note_file.read_text(encoding="utf-8"))
+        note_text = (
+            sys.stdin.read()
+            if args.note_file == "-"
+            else Path(args.note_file).read_text(encoding="utf-8")
+        )
+        payload = parse_daily_note(note_text)
         if args.format == "markdown":
             output = render_markdown(payload)
         else:
