@@ -105,6 +105,25 @@ class DailyParserTests(unittest.TestCase):
             ("Write release notes", "Ship parser support", "Review summary output"),
         )
 
+    def test_ignores_empty_list_placeholders(self) -> None:
+        entry = parse_daily_note(
+            """
+            Highlights:
+            -
+            - Shipped useful work
+            Follow-ups:
+            - [ ]
+            - [ ] Send update
+            Notes:
+            *
+            Loose note
+            """
+        )
+
+        self.assertEqual(entry.highlights, ("Shipped useful work",))
+        self.assertEqual(entry.follow_ups, ("Send update",))
+        self.assertEqual(entry.notes, ("Loose note",))
+
     def test_accepts_inline_section_values(self) -> None:
         entry = parse_daily_note(
             """

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 
 ORDERED_ITEM_RE = re.compile(r"^\d+[.)]\s+")
-CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s+")
+CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s*")
 DATE_ONLY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 DATE_HEADING_RE = re.compile(r"^#+\s+\d{4}-\d{2}-\d{2}\s*$")
 
@@ -82,7 +82,7 @@ def parse_daily_note(text: str) -> DailyEntry:
         inline_section = _split_inline_section(line)
         if inline_section is not None:
             current_section, value = inline_section
-            sections[current_section].append(_clean_item(value))
+            _append_clean_item(sections, current_section, value)
             continue
 
         normalized = _normalize_section_name(line)
@@ -90,7 +90,7 @@ def parse_daily_note(text: str) -> DailyEntry:
             current_section = SECTION_ALIASES[normalized]
             continue
 
-        sections[current_section].append(_clean_item(line))
+        _append_clean_item(sections, current_section, line)
 
     return DailyEntry(
         date=date,
@@ -102,6 +102,9 @@ def parse_daily_note(text: str) -> DailyEntry:
 
 
 def _clean_item(line: str) -> str:
+    if line in {"-", "*"}:
+        return ""
+
     for prefix in ("- ", "* "):
         if line.startswith(prefix):
             line = line[len(prefix) :].strip()
@@ -109,6 +112,14 @@ def _clean_item(line: str) -> str:
     else:
         line = ORDERED_ITEM_RE.sub("", line, count=1).strip()
     return CHECKBOX_ITEM_RE.sub("", line, count=1).strip()
+
+
+def _append_clean_item(
+    sections: dict[str, list[str]], section: str, line: str
+) -> None:
+    item = _clean_item(line)
+    if item:
+        sections[section].append(item)
 
 
 def _normalize_section_name(line: str) -> str:

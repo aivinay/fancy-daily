@@ -39,7 +39,7 @@ Dates may be written as `Date: 2026-07-02`, as a plain `2026-07-02` line, or as
 a Markdown heading such as `# 2026-07-02`.
 Bullet items using `-`, `*`, `1.`, or `1)` are normalized before rendering.
 Markdown task list markers like `[ ]`, `[x]`, and `[X]` are also removed from
-parsed items.
+parsed items. Empty bullet or checkbox placeholders are ignored.
 
 ## Usage
 
