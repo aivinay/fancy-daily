@@ -138,6 +138,32 @@ class CliTests(unittest.TestCase):
         self.assertIn("# 2026-06-29", rendered)
         self.assertIn("- Added file output", rendered)
 
+    def test_parse_command_treats_dash_output_as_stdout(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            note = root / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-07-25",
+                        "Highlights:",
+                        "- Kept output on stdout",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--output", "-", str(note)])
+
+            dash_file = root / "-"
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["date"], "2026-07-25")
+        self.assertEqual(payload["highlights"], ["Kept output on stdout"])
+        self.assertFalse(dash_file.exists())
+
     def test_parse_command_writes_json_output_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

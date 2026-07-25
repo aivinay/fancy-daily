@@ -83,6 +83,7 @@ PYTHONPATH=src python3 -m fancy_daily.cli parse \
 ```
 
 Missing parent directories for `--output` are created automatically.
+Use `--output -` to write to stdout explicitly.
 
 When a note has a date but no section entries, Markdown output keeps the date
 heading and renders `_No entries recorded._` so empty daily logs are explicit.
