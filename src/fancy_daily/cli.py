@@ -25,7 +25,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     parse.add_argument("note_file", help="Path to a note file, or '-' for stdin.")
     parse.add_argument(
         "--format",
-        choices=("json", "markdown"),
+        choices=("json", "markdown", "md"),
         default="json",
         help="Output format.",
     )
@@ -43,7 +43,7 @@ def main(argv: Sequence[str] | None = None) -> None:
             else Path(args.note_file).read_text(encoding="utf-8")
         )
         payload = parse_daily_note(note_text)
-        if args.format == "markdown":
+        if args.format in {"markdown", "md"}:
             output = render_markdown(payload)
         else:
             output = json.dumps(asdict(payload), indent=2, sort_keys=True) + "\n"

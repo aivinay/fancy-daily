@@ -104,6 +104,27 @@ class CliTests(unittest.TestCase):
         self.assertIn("# 2026-06-28", stdout.getvalue())
         self.assertIn("- Wired markdown output", stdout.getvalue())
 
+    def test_parse_command_accepts_md_format_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-07-26",
+                        "Highlights:",
+                        "- Used short markdown alias",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "md", str(note)])
+
+        self.assertIn("# 2026-07-26", stdout.getvalue())
+        self.assertIn("- Used short markdown alias", stdout.getvalue())
+
     def test_parse_command_outputs_empty_markdown_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"
