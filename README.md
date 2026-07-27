@@ -80,7 +80,7 @@ Write output to a file:
 ```bash
 PYTHONPATH=src python3 -m fancy_daily.cli parse \
   --format markdown \
-  --output reports/daily/summary.md \
+  -o reports/daily/summary.md \
   daily.txt
 ```
 

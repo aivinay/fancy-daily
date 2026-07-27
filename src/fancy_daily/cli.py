@@ -30,6 +30,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         help="Output format.",
     )
     parse.add_argument(
+        "-o",
         "--output",
         type=Path,
         help="Write output to a file instead of stdout.",
