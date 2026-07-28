@@ -75,6 +75,8 @@ Pipe a note through standard input by using `-` as the file path:
 cat daily.txt | PYTHONPATH=src python3 -m fancy_daily.cli parse -
 ```
 
+When no file path is provided, `parse` also reads from standard input.
+
 Write output to a file:
 
 ```bash

@@ -62,6 +62,25 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["date"], "2026-07-23")
         self.assertEqual(payload["highlights"], ["Parsed piped input"])
 
+    def test_parse_command_reads_stdin_without_path(self) -> None:
+        stdout = io.StringIO()
+        stdin = io.StringIO(
+            "\n".join(
+                [
+                    "Date: 2026-07-28",
+                    "Highlights:",
+                    "- Parsed implicit stdin",
+                ]
+            )
+        )
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["date"], "2026-07-28")
+        self.assertEqual(payload["highlights"], ["Parsed implicit stdin"])
+
     def test_parse_command_outputs_empty_json_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

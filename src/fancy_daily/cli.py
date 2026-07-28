@@ -22,7 +22,12 @@ def main(argv: Sequence[str] | None = None) -> None:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     parse = subparsers.add_parser("parse", help="Parse a daily note.")
-    parse.add_argument("note_file", help="Path to a note file, or '-' for stdin.")
+    parse.add_argument(
+        "note_file",
+        nargs="?",
+        default="-",
+        help="Path to a note file, or '-' for stdin.",
+    )
     parse.add_argument(
         "--format",
         choices=("json", "markdown", "md"),
