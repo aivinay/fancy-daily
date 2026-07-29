@@ -6,8 +6,7 @@ from dataclasses import dataclass
 
 ORDERED_ITEM_RE = re.compile(r"^\d+[.)]\s+")
 CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s*")
-DATE_ONLY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-DATE_HEADING_RE = re.compile(r"^#+\s+\d{4}-\d{2}-\d{2}\s*$")
+DATE_LINE_RE = re.compile(r"^(?:#+\s+)?(?P<date>\d{4}-\d{2}-\d{2})(?:\s+.*)?$")
 
 SECTION_ALIASES = {
     "accomplishment": "highlights",
@@ -71,12 +70,9 @@ def parse_daily_note(text: str) -> DailyEntry:
             date = line.split(":", 1)[1].strip() or None
             continue
 
-        if date is None and DATE_ONLY_RE.match(line):
-            date = line
-            continue
-
-        if date is None and DATE_HEADING_RE.match(line):
-            date = line.lstrip("#").strip()
+        date_match = DATE_LINE_RE.match(line)
+        if date is None and date_match:
+            date = date_match.group("date")
             continue
 
         inline_section = _split_inline_section(line)
