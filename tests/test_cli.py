@@ -144,6 +144,32 @@ class CliTests(unittest.TestCase):
         self.assertIn("# 2026-07-26", stdout.getvalue())
         self.assertIn("- Used short markdown alias", stdout.getvalue())
 
+    def test_parse_command_outputs_compact_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-07-30",
+                        "Highlights:",
+                        "- Used compact JSON output",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "compact-json", str(note)])
+
+        self.assertEqual(
+            stdout.getvalue(),
+            (
+                '{"blockers": [], "date": "2026-07-30", "follow_ups": [], '
+                '"highlights": ["Used compact JSON output"], "notes": []}\n'
+            ),
+        )
+
     def test_parse_command_outputs_empty_markdown_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

@@ -57,6 +57,7 @@ PYTHONPATH=src python3 -m fancy_daily.cli parse --format markdown daily.txt
 ```
 
 Use `--format md` for the same Markdown output with a shorter option value.
+Use `--format compact-json` for single-line JSON output in scripts or logs.
 
 Check the installed CLI version:
 
