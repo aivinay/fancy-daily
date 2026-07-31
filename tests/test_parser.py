@@ -116,6 +116,19 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.date, "2026-07-29")
         self.assertEqual(entry.notes, ("Keep titled daily notes readable",))
 
+    def test_accepts_date_label_with_title(self) -> None:
+        entry = parse_daily_note(
+            """
+            Date: 2026-07-31 Friday Review
+
+            Highlights:
+            - Parsed titled date label
+            """
+        )
+
+        self.assertEqual(entry.date, "2026-07-31")
+        self.assertEqual(entry.highlights, ("Parsed titled date label",))
+
     def test_cleans_checkbox_list_items(self) -> None:
         entry = parse_daily_note(
             """

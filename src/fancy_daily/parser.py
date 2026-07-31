@@ -67,7 +67,9 @@ def parse_daily_note(text: str) -> DailyEntry:
             continue
 
         if line.lower().startswith("date:"):
-            date = line.split(":", 1)[1].strip() or None
+            value = line.split(":", 1)[1].strip()
+            date_match = DATE_LINE_RE.match(value)
+            date = date_match.group("date") if date_match else value or None
             continue
 
         date_match = DATE_LINE_RE.match(line)
