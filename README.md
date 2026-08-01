@@ -31,7 +31,8 @@ Supported sections are:
 - `Blockers`, `Blocker`, `Risks`, `Risk`, `Issues`, or `Issue`
 - `Follow-ups`, `Follow-up`, `Follow ups`, `Followups`, `Actions`,
   `Action items`, `Next steps`, `Tasks`, `Task`, `To do`, `Todo`, or `Todos`
-- `Notes`, `Note`, `Reflections`, `Reflection`, `Thoughts`, or `Thought`
+- `Notes`, `Note`, `Reflections`, `Reflection`, `Thoughts`, `Thought`,
+  `Lessons`, `Lesson`, `Learnings`, or `Learning`
 
 Section labels may be written on their own line or inline with a value, such as
 `Highlights: Finished the parser update`. Unlabeled lines are treated as notes.

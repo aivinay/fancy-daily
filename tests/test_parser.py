@@ -252,6 +252,23 @@ class DailyParserTests(unittest.TestCase):
             ("The review loop is getting clearer", "Keep tomorrow's slice small"),
         )
 
+    def test_accepts_learning_note_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Lessons:
+            - Keep daily changes focused
+            Learning: Parser aliases should match real note habits
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            (
+                "Keep daily changes focused",
+                "Parser aliases should match real note habits",
+            ),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
