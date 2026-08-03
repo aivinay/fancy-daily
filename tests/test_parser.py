@@ -269,6 +269,20 @@ class DailyParserTests(unittest.TestCase):
             ),
         )
 
+    def test_accepts_idea_note_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Ideas:
+            - Try a weekly rollup command
+            Idea: Keep summaries easy to scan
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            ("Try a weekly rollup command", "Keep summaries easy to scan"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
