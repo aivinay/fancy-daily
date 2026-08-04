@@ -283,6 +283,20 @@ class DailyParserTests(unittest.TestCase):
             ("Try a weekly rollup command", "Keep summaries easy to scan"),
         )
 
+    def test_accepts_gratitude_note_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Gratitude:
+            - Clear review feedback
+            Thanks: Helpful parser examples
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            ("Clear review feedback", "Helpful parser examples"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

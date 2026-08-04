@@ -12,6 +12,7 @@ SECTION_ALIASES = {
     "accomplishment": "highlights",
     "accomplishments": "highlights",
     "done": "highlights",
+    "gratitude": "notes",
     "highlights": "highlights",
     "highlight": "highlights",
     "idea": "notes",
@@ -45,6 +46,7 @@ SECTION_ALIASES = {
     "reflections": "notes",
     "thought": "notes",
     "thoughts": "notes",
+    "thanks": "notes",
 }
 
 

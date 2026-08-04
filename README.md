@@ -32,7 +32,8 @@ Supported sections are:
 - `Follow-ups`, `Follow-up`, `Follow ups`, `Followups`, `Actions`,
   `Action items`, `Next steps`, `Tasks`, `Task`, `To do`, `Todo`, or `Todos`
 - `Notes`, `Note`, `Reflections`, `Reflection`, `Thoughts`, `Thought`,
-  `Lessons`, `Lesson`, `Learnings`, `Learning`, `Ideas`, or `Idea`
+  `Lessons`, `Lesson`, `Learnings`, `Learning`, `Ideas`, `Idea`, `Gratitude`,
+  `Thanks`
 
 Section labels may be written on their own line or inline with a value, such as
 `Highlights: Finished the parser update`. Unlabeled lines are treated as notes.
