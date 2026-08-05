@@ -9,7 +9,7 @@ from typing import Sequence
 
 from . import __version__
 from .parser import parse_daily_note
-from .renderer import render_markdown
+from .renderer import render_markdown, render_text
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -30,7 +30,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     parse.add_argument(
         "--format",
-        choices=("json", "compact-json", "markdown", "md"),
+        choices=("json", "compact-json", "markdown", "md", "text"),
         default="json",
         help="Output format.",
     )
@@ -51,6 +51,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         payload = parse_daily_note(note_text)
         if args.format in {"markdown", "md"}:
             output = render_markdown(payload)
+        elif args.format == "text":
+            output = render_text(payload)
         elif args.format == "compact-json":
             output = json.dumps(asdict(payload), sort_keys=True) + "\n"
         else:

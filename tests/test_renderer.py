@@ -1,6 +1,6 @@
 import unittest
 
-from fancy_daily import parse_daily_note, render_markdown
+from fancy_daily import parse_daily_note, render_markdown, render_text
 
 
 class MarkdownRendererTests(unittest.TestCase):
@@ -45,6 +45,39 @@ class MarkdownRendererTests(unittest.TestCase):
         entry = parse_daily_note("")
 
         self.assertEqual(render_markdown(entry), "# Daily Summary\n\n_No entries recorded._\n")
+
+    def test_renders_plain_text_summary(self) -> None:
+        entry = parse_daily_note(
+            """
+            Date: 2026-08-05
+            Highlights:
+            - Added text output
+            Notes:
+            - Keep terminal output readable
+            """
+        )
+
+        self.assertEqual(
+            render_text(entry),
+            "\n".join(
+                [
+                    "2026-08-05",
+                    "==========",
+                    "",
+                    "Highlights:",
+                    "- Added text output",
+                    "",
+                    "Notes:",
+                    "- Keep terminal output readable",
+                    "",
+                ]
+            ),
+        )
+
+    def test_renders_plain_text_empty_state(self) -> None:
+        entry = parse_daily_note("")
+
+        self.assertEqual(render_text(entry), "Daily Summary\n=============\n\nNo entries recorded.\n")
 
 
 if __name__ == "__main__":

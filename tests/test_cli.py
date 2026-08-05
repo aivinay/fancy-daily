@@ -144,6 +144,29 @@ class CliTests(unittest.TestCase):
         self.assertIn("# 2026-07-26", stdout.getvalue())
         self.assertIn("- Used short markdown alias", stdout.getvalue())
 
+    def test_parse_command_outputs_text_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-08-05",
+                        "Highlights:",
+                        "- Rendered plain text",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "text", str(note)])
+
+        self.assertEqual(
+            stdout.getvalue(),
+            "2026-08-05\n==========\n\nHighlights:\n- Rendered plain text\n",
+        )
+
     def test_parse_command_outputs_compact_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"
