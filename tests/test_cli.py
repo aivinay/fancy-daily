@@ -167,6 +167,35 @@ class CliTests(unittest.TestCase):
             "2026-08-05\n==========\n\nHighlights:\n- Rendered plain text\n",
         )
 
+    def test_parse_command_accepts_text_format_aliases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-08-06",
+                        "Notes:",
+                        "- Used a text alias",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            outputs: list[str] = []
+            for output_format in ("txt", "plain"):
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    main(["parse", "--format", output_format, str(note)])
+                outputs.append(stdout.getvalue())
+
+        self.assertEqual(
+            outputs,
+            [
+                "2026-08-06\n==========\n\nNotes:\n- Used a text alias\n",
+                "2026-08-06\n==========\n\nNotes:\n- Used a text alias\n",
+            ],
+        )
+
     def test_parse_command_outputs_compact_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

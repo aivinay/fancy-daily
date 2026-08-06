@@ -30,7 +30,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     parse.add_argument(
         "--format",
-        choices=("json", "compact-json", "markdown", "md", "text"),
+        choices=("json", "compact-json", "markdown", "md", "text", "txt", "plain"),
         default="json",
         help="Output format.",
     )
@@ -51,7 +51,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         payload = parse_daily_note(note_text)
         if args.format in {"markdown", "md"}:
             output = render_markdown(payload)
-        elif args.format == "text":
+        elif args.format in {"text", "txt", "plain"}:
             output = render_text(payload)
         elif args.format == "compact-json":
             output = json.dumps(asdict(payload), sort_keys=True) + "\n"
