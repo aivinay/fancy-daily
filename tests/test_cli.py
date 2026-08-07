@@ -222,6 +222,32 @@ class CliTests(unittest.TestCase):
             ),
         )
 
+    def test_parse_command_accepts_compact_format_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-08-07",
+                        "Highlights:",
+                        "- Used compact alias",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "compact", str(note)])
+
+        self.assertEqual(
+            stdout.getvalue(),
+            (
+                '{"blockers": [], "date": "2026-08-07", "follow_ups": [], '
+                '"highlights": ["Used compact alias"], "notes": []}\n'
+            ),
+        )
+
     def test_parse_command_outputs_empty_markdown_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

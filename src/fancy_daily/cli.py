@@ -30,7 +30,16 @@ def main(argv: Sequence[str] | None = None) -> None:
     )
     parse.add_argument(
         "--format",
-        choices=("json", "compact-json", "markdown", "md", "text", "txt", "plain"),
+        choices=(
+            "json",
+            "compact-json",
+            "compact",
+            "markdown",
+            "md",
+            "text",
+            "txt",
+            "plain",
+        ),
         default="json",
         help="Output format.",
     )
@@ -53,7 +62,7 @@ def main(argv: Sequence[str] | None = None) -> None:
             output = render_markdown(payload)
         elif args.format in {"text", "txt", "plain"}:
             output = render_text(payload)
-        elif args.format == "compact-json":
+        elif args.format in {"compact-json", "compact"}:
             output = json.dumps(asdict(payload), sort_keys=True) + "\n"
         else:
             output = json.dumps(asdict(payload), indent=2, sort_keys=True) + "\n"
