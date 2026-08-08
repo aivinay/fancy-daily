@@ -11,6 +11,8 @@ DATE_LINE_RE = re.compile(r"^(?:#+\s+)?(?P<date>\d{4}-\d{2}-\d{2})(?:\s+.*)?$")
 SECTION_ALIASES = {
     "accomplishment": "highlights",
     "accomplishments": "highlights",
+    "challenge": "blockers",
+    "challenges": "blockers",
     "done": "highlights",
     "gratitude": "notes",
     "highlights": "highlights",

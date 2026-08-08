@@ -238,6 +238,20 @@ class DailyParserTests(unittest.TestCase):
             ("Review window is tight", "Waiting on fixture data"),
         )
 
+    def test_accepts_challenge_blocker_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Challenges:
+            - Review queue is busy
+            Challenge: Need clearer fixture naming
+            """
+        )
+
+        self.assertEqual(
+            entry.blockers,
+            ("Review queue is busy", "Need clearer fixture naming"),
+        )
+
     def test_accepts_reflection_and_thought_note_aliases(self) -> None:
         entry = parse_daily_note(
             """
