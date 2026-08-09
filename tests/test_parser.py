@@ -252,6 +252,20 @@ class DailyParserTests(unittest.TestCase):
             ("Review queue is busy", "Need clearer fixture naming"),
         )
 
+    def test_accepts_obstacle_blocker_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Obstacles:
+            - Waiting on environment access
+            Obstacle: Need clearer sample data
+            """
+        )
+
+        self.assertEqual(
+            entry.blockers,
+            ("Waiting on environment access", "Need clearer sample data"),
+        )
+
     def test_accepts_reflection_and_thought_note_aliases(self) -> None:
         entry = parse_daily_note(
             """

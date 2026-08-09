@@ -19,6 +19,8 @@ SECTION_ALIASES = {
     "highlight": "highlights",
     "idea": "notes",
     "ideas": "notes",
+    "obstacle": "blockers",
+    "obstacles": "blockers",
     "wins": "highlights",
     "blockers": "blockers",
     "blocker": "blockers",
