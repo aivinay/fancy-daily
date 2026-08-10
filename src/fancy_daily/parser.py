@@ -21,6 +21,8 @@ SECTION_ALIASES = {
     "ideas": "notes",
     "obstacle": "blockers",
     "obstacles": "blockers",
+    "problem": "blockers",
+    "problems": "blockers",
     "wins": "highlights",
     "blockers": "blockers",
     "blocker": "blockers",

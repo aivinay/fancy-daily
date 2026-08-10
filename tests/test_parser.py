@@ -266,6 +266,20 @@ class DailyParserTests(unittest.TestCase):
             ("Waiting on environment access", "Need clearer sample data"),
         )
 
+    def test_accepts_problem_blocker_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Problems:
+            - Release notes are incomplete
+            Problem: Need a clearer review owner
+            """
+        )
+
+        self.assertEqual(
+            entry.blockers,
+            ("Release notes are incomplete", "Need a clearer review owner"),
+        )
+
     def test_accepts_reflection_and_thought_note_aliases(self) -> None:
         entry = parse_daily_note(
             """
