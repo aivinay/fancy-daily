@@ -13,6 +13,8 @@ SECTION_ALIASES = {
     "accomplishments": "highlights",
     "challenge": "blockers",
     "challenges": "blockers",
+    "concern": "blockers",
+    "concerns": "blockers",
     "done": "highlights",
     "gratitude": "notes",
     "highlights": "highlights",

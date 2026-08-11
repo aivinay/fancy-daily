@@ -280,6 +280,20 @@ class DailyParserTests(unittest.TestCase):
             ("Release notes are incomplete", "Need a clearer review owner"),
         )
 
+    def test_accepts_concern_blocker_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Concerns:
+            - Review capacity is thin
+            Concern: Need clearer release criteria
+            """
+        )
+
+        self.assertEqual(
+            entry.blockers,
+            ("Review capacity is thin", "Need clearer release criteria"),
+        )
+
     def test_accepts_reflection_and_thought_note_aliases(self) -> None:
         entry = parse_daily_note(
             """
