@@ -294,6 +294,20 @@ class DailyParserTests(unittest.TestCase):
             ("Review capacity is thin", "Need clearer release criteria"),
         )
 
+    def test_accepts_dependency_blocker_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Dependencies:
+            - Waiting on API credentials
+            Dependency: Need product review before launch
+            """
+        )
+
+        self.assertEqual(
+            entry.blockers,
+            ("Waiting on API credentials", "Need product review before launch"),
+        )
+
     def test_accepts_reflection_and_thought_note_aliases(self) -> None:
         entry = parse_daily_note(
             """
