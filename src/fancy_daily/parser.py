@@ -15,6 +15,8 @@ SECTION_ALIASES = {
     "challenges": "blockers",
     "concern": "blockers",
     "concerns": "blockers",
+    "delay": "blockers",
+    "delays": "blockers",
     "dependencies": "blockers",
     "dependency": "blockers",
     "done": "highlights",

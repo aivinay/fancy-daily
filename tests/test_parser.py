@@ -308,6 +308,20 @@ class DailyParserTests(unittest.TestCase):
             ("Waiting on API credentials", "Need product review before launch"),
         )
 
+    def test_accepts_delay_blocker_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Delays:
+            - Fixture refresh is running late
+            Delay: Release notes need one more review
+            """
+        )
+
+        self.assertEqual(
+            entry.blockers,
+            ("Fixture refresh is running late", "Release notes need one more review"),
+        )
+
     def test_accepts_reflection_and_thought_note_aliases(self) -> None:
         entry = parse_daily_note(
             """
