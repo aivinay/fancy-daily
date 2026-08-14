@@ -322,6 +322,20 @@ class DailyParserTests(unittest.TestCase):
             ("Fixture refresh is running late", "Release notes need one more review"),
         )
 
+    def test_accepts_impediment_blocker_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Impediments:
+            - Release checklist access is missing
+            Impediment: Need stakeholder sign-off
+            """
+        )
+
+        self.assertEqual(
+            entry.blockers,
+            ("Release checklist access is missing", "Need stakeholder sign-off"),
+        )
+
     def test_accepts_reflection_and_thought_note_aliases(self) -> None:
         entry = parse_daily_note(
             """
