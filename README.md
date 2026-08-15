@@ -30,8 +30,8 @@ Supported sections are:
   `Done`
 - `Blockers`, `Blocker`, `Risks`, `Risk`, `Issues`, `Issue`, `Challenges`,
   `Challenge`, `Obstacles`, `Obstacle`, `Problems`, `Problem`, `Concerns`,
-  `Concern`, `Delays`, `Delay`, `Dependencies`, `Dependency`, `Impediments`,
-  or `Impediment`
+  `Concern`, `Delays`, `Delay`, `Dependencies`, `Dependency`, `Escalations`,
+  `Escalation`, `Impediments`, or `Impediment`
 - `Follow-ups`, `Follow-up`, `Follow ups`, `Followups`, `Actions`,
   `Action items`, `Next steps`, `Tasks`, `Task`, `To do`, `Todo`, or `Todos`
 - `Notes`, `Note`, `Reflections`, `Reflection`, `Thoughts`, `Thought`,

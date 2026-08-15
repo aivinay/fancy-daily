@@ -20,6 +20,8 @@ SECTION_ALIASES = {
     "dependencies": "blockers",
     "dependency": "blockers",
     "done": "highlights",
+    "escalation": "blockers",
+    "escalations": "blockers",
     "impediment": "blockers",
     "impediments": "blockers",
     "gratitude": "notes",
