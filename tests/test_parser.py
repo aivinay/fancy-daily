@@ -350,6 +350,20 @@ class DailyParserTests(unittest.TestCase):
             ("Contract review needs leadership input", "Customer approval is blocked"),
         )
 
+    def test_accepts_stuck_blocker_alias(self) -> None:
+        entry = parse_daily_note(
+            """
+            Stuck:
+            - Need clearer deploy access
+            Stuck: Waiting on release owner
+            """
+        )
+
+        self.assertEqual(
+            entry.blockers,
+            ("Need clearer deploy access", "Waiting on release owner"),
+        )
+
     def test_accepts_reflection_and_thought_note_aliases(self) -> None:
         entry = parse_daily_note(
             """

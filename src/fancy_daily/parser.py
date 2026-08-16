@@ -44,6 +44,7 @@ SECTION_ALIASES = {
     "lessons": "notes",
     "risk": "blockers",
     "risks": "blockers",
+    "stuck": "blockers",
     "actions": "follow_ups",
     "action items": "follow_ups",
     "follow-ups": "follow_ups",
