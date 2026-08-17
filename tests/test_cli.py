@@ -43,6 +43,32 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["highlights"], ["Added CLI"])
         self.assertEqual(payload["follow_ups"], ["Add markdown rendering"])
 
+    def test_parse_command_accepts_pretty_json_aliases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-08-17",
+                        "Highlights:",
+                        "- Used explicit pretty JSON output",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            outputs: list[str] = []
+            for output_format in ("pretty-json", "pretty"):
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    main(["parse", "--format", output_format, str(note)])
+                outputs.append(stdout.getvalue())
+
+        self.assertEqual(outputs[0], outputs[1])
+        self.assertIn('\n  "date": "2026-08-17"', outputs[0])
+        payload = json.loads(outputs[0])
+        self.assertEqual(payload["highlights"], ["Used explicit pretty JSON output"])
+
     def test_parse_command_reads_stdin_for_dash_path(self) -> None:
         stdout = io.StringIO()
         stdin = io.StringIO(

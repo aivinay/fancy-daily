@@ -32,6 +32,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         "--format",
         choices=(
             "json",
+            "pretty-json",
+            "pretty",
             "compact-json",
             "compact",
             "markdown",
