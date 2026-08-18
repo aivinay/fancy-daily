@@ -423,6 +423,23 @@ class DailyParserTests(unittest.TestCase):
             ("Clear review feedback", "Helpful parser examples"),
         )
 
+    def test_accepts_decision_note_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Decisions:
+            - Keep the CLI output stable
+            Decision: Document parser vocabulary before adding rollups
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            (
+                "Keep the CLI output stable",
+                "Document parser vocabulary before adding rollups",
+            ),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
