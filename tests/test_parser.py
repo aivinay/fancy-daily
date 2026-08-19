@@ -224,6 +224,20 @@ class DailyParserTests(unittest.TestCase):
             ("Finished parser cleanup", "Published summary"),
         )
 
+    def test_accepts_outcome_highlight_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Outcomes:
+            - Cut weekly summary prep time
+            Outcome: Daily notes are easier to scan
+            """
+        )
+
+        self.assertEqual(
+            entry.highlights,
+            ("Cut weekly summary prep time", "Daily notes are easier to scan"),
+        )
+
     def test_accepts_risk_and_issue_blocker_aliases(self) -> None:
         entry = parse_daily_note(
             """
