@@ -238,6 +238,23 @@ class DailyParserTests(unittest.TestCase):
             ("Cut weekly summary prep time", "Daily notes are easier to scan"),
         )
 
+    def test_accepts_milestone_highlight_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Milestones:
+            - Finished the first parser vocabulary pass
+            Milestone: Documented stable output aliases
+            """
+        )
+
+        self.assertEqual(
+            entry.highlights,
+            (
+                "Finished the first parser vocabulary pass",
+                "Documented stable output aliases",
+            ),
+        )
+
     def test_accepts_risk_and_issue_blocker_aliases(self) -> None:
         entry = parse_daily_note(
             """

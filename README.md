@@ -27,7 +27,7 @@ Keep the format easy to write by hand.
 Supported sections are:
 
 - `Highlights`, `Highlight`, `Wins`, `Accomplishments`, `Accomplishment`,
-  `Outcomes`, `Outcome`, or `Done`
+  `Outcomes`, `Outcome`, `Milestones`, `Milestone`, or `Done`
 - `Blockers`, `Blocker`, `Risks`, `Risk`, `Issues`, `Issue`, `Challenges`,
   `Challenge`, `Obstacles`, `Obstacle`, `Problems`, `Problem`, `Concerns`,
   `Concern`, `Delays`, `Delay`, `Dependencies`, `Dependency`, `Escalations`,

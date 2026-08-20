@@ -46,6 +46,8 @@ SECTION_ALIASES = {
     "learnings": "notes",
     "lesson": "notes",
     "lessons": "notes",
+    "milestone": "highlights",
+    "milestones": "highlights",
     "risk": "blockers",
     "risks": "blockers",
     "stuck": "blockers",
