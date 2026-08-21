@@ -471,6 +471,23 @@ class DailyParserTests(unittest.TestCase):
             ),
         )
 
+    def test_accepts_summary_note_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Summary:
+            - Parser vocabulary now covers more daily note styles
+            Summaries: Keep section aliases explicit and tested
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            (
+                "Parser vocabulary now covers more daily note styles",
+                "Keep section aliases explicit and tested",
+            ),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

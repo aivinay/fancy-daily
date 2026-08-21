@@ -51,6 +51,8 @@ SECTION_ALIASES = {
     "risk": "blockers",
     "risks": "blockers",
     "stuck": "blockers",
+    "summaries": "notes",
+    "summary": "notes",
     "actions": "follow_ups",
     "action items": "follow_ups",
     "follow-ups": "follow_ups",
