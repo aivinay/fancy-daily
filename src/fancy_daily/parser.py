@@ -35,6 +35,7 @@ SECTION_ALIASES = {
     "obstacles": "blockers",
     "outcome": "highlights",
     "outcomes": "highlights",
+    "progress": "highlights",
     "problem": "blockers",
     "problems": "blockers",
     "wins": "highlights",

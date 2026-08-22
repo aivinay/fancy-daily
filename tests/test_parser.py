@@ -255,6 +255,23 @@ class DailyParserTests(unittest.TestCase):
             ),
         )
 
+    def test_accepts_progress_highlight_alias(self) -> None:
+        entry = parse_daily_note(
+            """
+            Progress:
+            - Added one more daily note vocabulary alias
+            Progress: Kept parser behavior covered by tests
+            """
+        )
+
+        self.assertEqual(
+            entry.highlights,
+            (
+                "Added one more daily note vocabulary alias",
+                "Kept parser behavior covered by tests",
+            ),
+        )
+
     def test_accepts_risk_and_issue_blocker_aliases(self) -> None:
         entry = parse_daily_note(
             """
