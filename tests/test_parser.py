@@ -505,6 +505,20 @@ class DailyParserTests(unittest.TestCase):
             ),
         )
 
+    def test_accepts_review_note_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Reviews:
+            - Weekly notes need one final pass
+            Review: Keep the summary focused
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            ("Weekly notes need one final pass", "Keep the summary focused"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

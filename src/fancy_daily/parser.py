@@ -70,6 +70,8 @@ SECTION_ALIASES = {
     "note": "notes",
     "reflection": "notes",
     "reflections": "notes",
+    "review": "notes",
+    "reviews": "notes",
     "thought": "notes",
     "thoughts": "notes",
     "thanks": "notes",
