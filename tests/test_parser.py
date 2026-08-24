@@ -519,6 +519,23 @@ class DailyParserTests(unittest.TestCase):
             ("Weekly notes need one final pass", "Keep the summary focused"),
         )
 
+    def test_accepts_retrospective_note_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Retrospectives:
+            - The release rhythm is getting easier to sustain
+            Retrospective: Keep the next improvement small
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            (
+                "The release rhythm is getting easier to sustain",
+                "Keep the next improvement small",
+            ),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
