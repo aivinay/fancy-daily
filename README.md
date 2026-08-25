@@ -45,7 +45,7 @@ Dates may be written as `Date: 2026-07-02`, as a plain `2026-07-02` line, or as
 a Markdown heading such as `# 2026-07-02`. Date labels, plain date lines, and
 date headings may include trailing title text, such as `# 2026-07-02 Friday
 Review`.
-Bullet items using `-`, `*`, `1.`, or `1)` are normalized before rendering.
+Bullet items using `-`, `*`, `+`, `1.`, or `1)` are normalized before rendering.
 Markdown task list markers like `[ ]`, `[x]`, and `[X]` are also removed from
 parsed items. Empty bullet or checkbox placeholders are ignored.
 

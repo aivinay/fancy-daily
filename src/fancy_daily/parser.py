@@ -141,7 +141,7 @@ def _clean_item(line: str) -> str:
     if line in {"-", "*"}:
         return ""
 
-    for prefix in ("- ", "* "):
+    for prefix in ("- ", "* ", "+ "):
         if line.startswith(prefix):
             line = line[len(prefix) :].strip()
             break

@@ -50,6 +50,20 @@ class DailyParserTests(unittest.TestCase):
             ("Added ordered list parsing", "Kept parser output stable"),
         )
 
+    def test_cleans_plus_list_items(self) -> None:
+        entry = parse_daily_note(
+            """
+            Notes:
+            + Captured a Markdown plus bullet
+            + Kept the item text clean
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            ("Captured a Markdown plus bullet", "Kept the item text clean"),
+        )
+
     def test_accepts_markdown_heading_sections(self) -> None:
         entry = parse_daily_note(
             """
