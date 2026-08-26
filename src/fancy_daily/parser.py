@@ -138,7 +138,7 @@ def parse_daily_note(text: str) -> DailyEntry:
 
 
 def _clean_item(line: str) -> str:
-    if line in {"-", "*"}:
+    if line in {"-", "*", "+"}:
         return ""
 
     for prefix in ("- ", "* ", "+ "):

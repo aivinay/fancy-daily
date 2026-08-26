@@ -168,6 +168,7 @@ class DailyParserTests(unittest.TestCase):
             - [ ]
             - [ ] Send update
             Notes:
+            +
             *
             Loose note
             """

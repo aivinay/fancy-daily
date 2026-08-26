@@ -48,6 +48,7 @@ Review`.
 Bullet items using `-`, `*`, `+`, `1.`, or `1)` are normalized before rendering.
 Markdown task list markers like `[ ]`, `[x]`, and `[X]` are also removed from
 parsed items. Empty bullet or checkbox placeholders are ignored.
+This includes bare `-`, `*`, and `+` placeholder lines.
 
 ## Usage
 
