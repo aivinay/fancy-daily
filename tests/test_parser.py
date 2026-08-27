@@ -178,6 +178,24 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.follow_ups, ("Send update",))
         self.assertEqual(entry.notes, ("Loose note",))
 
+    def test_ignores_markdown_horizontal_rules(self) -> None:
+        entry = parse_daily_note(
+            """
+            Notes:
+            First note
+            ---
+            Second note
+            ***
+            Third note
+            ___
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            ("First note", "Second note", "Third note"),
+        )
+
     def test_accepts_inline_section_values(self) -> None:
         entry = parse_daily_note(
             """

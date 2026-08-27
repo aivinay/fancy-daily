@@ -103,6 +103,8 @@ def parse_daily_note(text: str) -> DailyEntry:
         line = raw_line.strip()
         if not line:
             continue
+        if _is_markdown_rule(line):
+            continue
 
         if line.lower().startswith("date:"):
             value = line.split(":", 1)[1].strip()
@@ -160,6 +162,10 @@ def _append_clean_item(
 
 def _normalize_section_name(line: str) -> str:
     return line.lstrip("#").strip().rstrip(":").lower()
+
+
+def _is_markdown_rule(line: str) -> bool:
+    return len(line) >= 3 and len(set(line)) == 1 and line[0] in {"-", "*", "_"}
 
 
 def _split_inline_section(line: str) -> tuple[str, str] | None:
