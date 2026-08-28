@@ -165,7 +165,12 @@ def _normalize_section_name(line: str) -> str:
 
 
 def _is_markdown_rule(line: str) -> bool:
-    return len(line) >= 3 and len(set(line)) == 1 and line[0] in {"-", "*", "_"}
+    rule_chars = line.replace(" ", "")
+    return (
+        len(rule_chars) >= 3
+        and len(set(rule_chars)) == 1
+        and rule_chars[0] in {"-", "*", "_"}
+    )
 
 
 def _split_inline_section(line: str) -> tuple[str, str] | None:

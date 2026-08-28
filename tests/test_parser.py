@@ -188,12 +188,25 @@ class DailyParserTests(unittest.TestCase):
             ***
             Third note
             ___
+            Fourth note
+            - - -
+            Fifth note
+            * * *
+            Sixth note
+            _ _ _
             """
         )
 
         self.assertEqual(
             entry.notes,
-            ("First note", "Second note", "Third note"),
+            (
+                "First note",
+                "Second note",
+                "Third note",
+                "Fourth note",
+                "Fifth note",
+                "Sixth note",
+            ),
         )
 
     def test_accepts_inline_section_values(self) -> None:
@@ -352,13 +365,13 @@ class DailyParserTests(unittest.TestCase):
             """
             Problems:
             - Release notes are incomplete
-            Problem: Need a clearer review owner
+            Problem: Need a clear eview owner
             """
         )
 
         self.assertEqual(
             entry.blockers,
-            ("Release notes are incomplete", "Need a clearer review owner"),
+            ("Release notes are incomplete", "Need a clear eview owner"),
         )
 
     def test_accepts_concern_blocker_aliases(self) -> None:
