@@ -365,13 +365,13 @@ class DailyParserTests(unittest.TestCase):
             """
             Problems:
             - Release notes are incomplete
-            Problem: Need a clear eview owner
+            Problem: Need a clearer review owner
             """
         )
 
         self.assertEqual(
             entry.blockers,
-            ("Release notes are incomplete", "Need a clear eview owner"),
+            ("Release notes are incomplete", "Need a clearer review owner"),
         )
 
     def test_accepts_concern_blocker_aliases(self) -> None:
