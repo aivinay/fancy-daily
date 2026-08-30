@@ -54,11 +54,7 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     args = parser.parse_args(argv)
     if args.command == "parse":
-        note_text = (
-            sys.stdin.read()
-            if args.note_file == "-"
-            else Path(args.note_file).read_text(encoding="utf-8")
-        )
+        note_text = _read_note_text(args.note_file, parser)
         payload = parse_daily_note(note_text)
         if args.format in {"markdown", "md"}:
             output = render_markdown(payload)
@@ -74,6 +70,16 @@ def main(argv: Sequence[str] | None = None) -> None:
             args.output.write_text(output, encoding="utf-8")
         else:
             print(output, end="")
+
+
+def _read_note_text(note_file: str, parser: argparse.ArgumentParser) -> str:
+    if note_file == "-":
+        return sys.stdin.read()
+
+    try:
+        return Path(note_file).read_text(encoding="utf-8")
+    except OSError as exc:
+        parser.error(f"unable to read note file: {exc}")
 
 
 if __name__ == "__main__":

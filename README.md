@@ -93,6 +93,8 @@ cat daily.txt | PYTHONPATH=src python3 -m fancy_daily.cli parse -
 ```
 
 When no file path is provided, `parse` also reads from standard input.
+Missing input files are reported as command-line errors instead of Python
+tracebacks.
 
 Write output to a file:
 

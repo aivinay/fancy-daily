@@ -2,7 +2,7 @@ import io
 import json
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -106,6 +106,17 @@ class CliTests(unittest.TestCase):
         payload = json.loads(stdout.getvalue())
         self.assertEqual(payload["date"], "2026-07-28")
         self.assertEqual(payload["highlights"], ["Parsed implicit stdin"])
+
+    def test_parse_command_reports_missing_input_file(self) -> None:
+        stderr = io.StringIO()
+        missing = "missing-daily-note.txt"
+
+        with self.assertRaises(SystemExit) as raised, redirect_stderr(stderr):
+            main(["parse", missing])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("unable to read note file:", stderr.getvalue())
+        self.assertIn(missing, stderr.getvalue())
 
     def test_parse_command_outputs_empty_json_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
