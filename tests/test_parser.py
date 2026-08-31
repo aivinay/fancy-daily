@@ -256,6 +256,20 @@ class DailyParserTests(unittest.TestCase):
             ("Prepare demo", "Update checklist", "Share notes"),
         )
 
+    def test_accepts_next_action_follow_up_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Next actions:
+            - Draft the launch note
+            Next action: Confirm the review owner
+            """
+        )
+
+        self.assertEqual(
+            entry.follow_ups,
+            ("Draft the launch note", "Confirm the review owner"),
+        )
+
     def test_accepts_accomplishment_highlight_aliases(self) -> None:
         entry = parse_daily_note(
             """

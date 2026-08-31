@@ -33,7 +33,8 @@ Supported sections are:
   `Concern`, `Delays`, `Delay`, `Dependencies`, `Dependency`, `Escalations`,
   `Escalation`, `Impediments`, `Impediment`, or `Stuck`
 - `Follow-ups`, `Follow-up`, `Follow ups`, `Followups`, `Actions`,
-  `Action items`, `Next steps`, `Tasks`, `Task`, `To do`, `Todo`, or `Todos`
+  `Action items`, `Next action`, `Next actions`, `Next steps`, `Tasks`,
+  `Task`, `To do`, `Todo`, or `Todos`
 - `Notes`, `Note`, `Reflections`, `Reflection`, `Thoughts`, `Thought`,
   `Lessons`, `Lesson`, `Learnings`, `Learning`, `Ideas`, `Idea`, `Decisions`,
   `Decision`, `Summaries`, `Summary`, `Reviews`, `Review`, `Retrospectives`,
