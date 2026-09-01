@@ -415,6 +415,20 @@ class CliTests(unittest.TestCase):
         self.assertIn("# 2026-06-30", rendered)
         self.assertIn("- Created nested output directories", rendered)
 
+    def test_parse_command_reports_output_write_errors(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            note = root / "daily.txt"
+            note.write_text("Date: 2026-09-01\n", encoding="utf-8")
+
+            stderr = io.StringIO()
+            with self.assertRaises(SystemExit) as raised, redirect_stderr(stderr):
+                main(["parse", "--output", str(root), str(note)])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("unable to write output file:", stderr.getvalue())
+        self.assertIn(str(root), stderr.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

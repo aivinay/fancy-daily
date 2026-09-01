@@ -66,8 +66,7 @@ def main(argv: Sequence[str] | None = None) -> None:
             output = json.dumps(asdict(payload), indent=2, sort_keys=True) + "\n"
 
         if args.output and str(args.output) != "-":
-            args.output.parent.mkdir(parents=True, exist_ok=True)
-            args.output.write_text(output, encoding="utf-8")
+            _write_output(args.output, output, parser)
         else:
             print(output, end="")
 
@@ -80,6 +79,16 @@ def _read_note_text(note_file: str, parser: argparse.ArgumentParser) -> str:
         return Path(note_file).read_text(encoding="utf-8")
     except OSError as exc:
         parser.error(f"unable to read note file: {exc}")
+
+
+def _write_output(
+    output_path: Path, output: str, parser: argparse.ArgumentParser
+) -> None:
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(output, encoding="utf-8")
+    except OSError as exc:
+        parser.error(f"unable to write output file: {exc}")
 
 
 if __name__ == "__main__":
