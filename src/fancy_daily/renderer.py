@@ -1,6 +1,26 @@
 from __future__ import annotations
 
+import csv
+import io
+
 from .parser import DailyEntry
+
+
+def render_csv(entry: DailyEntry) -> str:
+    output = io.StringIO()
+    writer = csv.writer(output, lineterminator="\n")
+    writer.writerow(("date", "section", "index", "item"))
+
+    for section, items in (
+        ("highlights", entry.highlights),
+        ("blockers", entry.blockers),
+        ("follow_ups", entry.follow_ups),
+        ("notes", entry.notes),
+    ):
+        for index, item in enumerate(items, start=1):
+            writer.writerow((entry.date or "", section, index, item))
+
+    return output.getvalue()
 
 
 def render_markdown(entry: DailyEntry) -> str:

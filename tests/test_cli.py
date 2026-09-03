@@ -204,6 +204,38 @@ class CliTests(unittest.TestCase):
             "2026-08-05\n==========\n\nHighlights:\n- Rendered plain text\n",
         )
 
+    def test_parse_command_outputs_csv_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-09-03",
+                        "Highlights:",
+                        "- Exported CSV rows",
+                        "Notes:",
+                        "- Includes commas, safely",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "csv", str(note)])
+
+        self.assertEqual(
+            stdout.getvalue(),
+            "\n".join(
+                [
+                    "date,section,index,item",
+                    "2026-09-03,highlights,1,Exported CSV rows",
+                    '2026-09-03,notes,1,"Includes commas, safely"',
+                    "",
+                ]
+            ),
+        )
+
     def test_parse_command_accepts_text_format_aliases(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

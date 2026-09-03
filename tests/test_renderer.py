@@ -1,6 +1,6 @@
 import unittest
 
-from fancy_daily import parse_daily_note, render_markdown, render_text
+from fancy_daily import parse_daily_note, render_csv, render_markdown, render_text
 
 
 class MarkdownRendererTests(unittest.TestCase):
@@ -78,6 +78,35 @@ class MarkdownRendererTests(unittest.TestCase):
         entry = parse_daily_note("")
 
         self.assertEqual(render_text(entry), "Daily Summary\n=============\n\nNo entries recorded.\n")
+
+    def test_renders_csv_section_rows(self) -> None:
+        entry = parse_daily_note(
+            """
+            Date: 2026-09-03
+            Highlights:
+            - Shipped CSV output
+            Blockers:
+            - Waiting on review, still
+            Follow-ups:
+            - Share summary
+            Notes:
+            - Kept rows spreadsheet-friendly
+            """
+        )
+
+        self.assertEqual(
+            render_csv(entry),
+            "\n".join(
+                [
+                    "date,section,index,item",
+                    "2026-09-03,highlights,1,Shipped CSV output",
+                    '2026-09-03,blockers,1,"Waiting on review, still"',
+                    "2026-09-03,follow_ups,1,Share summary",
+                    "2026-09-03,notes,1,Kept rows spreadsheet-friendly",
+                    "",
+                ]
+            ),
+        )
 
 
 if __name__ == "__main__":

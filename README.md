@@ -74,6 +74,8 @@ Use `--format pretty-json` or `--format pretty` to request indented JSON
 explicitly.
 Use `--format compact-json` or `--format compact` for single-line JSON output
 in scripts or logs.
+Use `--format csv` for spreadsheet-friendly rows with `date`, `section`,
+`index`, and `item` columns.
 
 Check the installed CLI version:
 
