@@ -76,6 +76,7 @@ Use `--format compact-json` or `--format compact` for single-line JSON output
 in scripts or logs.
 Use `--format csv` for spreadsheet-friendly rows with `date`, `section`,
 `index`, and `item` columns.
+Use `--format tsv` for the same row layout with tab-separated columns.
 
 Check the installed CLI version:
 

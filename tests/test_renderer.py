@@ -1,6 +1,6 @@
 import unittest
 
-from fancy_daily import parse_daily_note, render_csv, render_markdown, render_text
+from fancy_daily import parse_daily_note, render_csv, render_markdown, render_text, render_tsv
 
 
 class MarkdownRendererTests(unittest.TestCase):
@@ -103,6 +103,29 @@ class MarkdownRendererTests(unittest.TestCase):
                     '2026-09-03,blockers,1,"Waiting on review, still"',
                     "2026-09-03,follow_ups,1,Share summary",
                     "2026-09-03,notes,1,Kept rows spreadsheet-friendly",
+                    "",
+                ]
+            ),
+        )
+
+    def test_renders_tsv_section_rows(self) -> None:
+        entry = parse_daily_note(
+            """
+            Date: 2026-09-04
+            Highlights:
+            - Added tab output
+            Notes:
+            - Keeps comma-heavy notes readable
+            """
+        )
+
+        self.assertEqual(
+            render_tsv(entry),
+            "\n".join(
+                [
+                    "date\tsection\tindex\titem",
+                    "2026-09-04\thighlights\t1\tAdded tab output",
+                    "2026-09-04\tnotes\t1\tKeeps comma-heavy notes readable",
                     "",
                 ]
             ),

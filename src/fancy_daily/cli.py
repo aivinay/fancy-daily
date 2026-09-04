@@ -9,7 +9,7 @@ from typing import Sequence
 
 from . import __version__
 from .parser import parse_daily_note
-from .renderer import render_csv, render_markdown, render_text
+from .renderer import render_csv, render_markdown, render_text, render_tsv
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -42,6 +42,7 @@ def main(argv: Sequence[str] | None = None) -> None:
             "text",
             "txt",
             "plain",
+            "tsv",
         ),
         default="json",
         help="Output format.",
@@ -63,6 +64,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             output = render_text(payload)
         elif args.format == "csv":
             output = render_csv(payload)
+        elif args.format == "tsv":
+            output = render_tsv(payload)
         elif args.format in {"compact-json", "compact"}:
             output = json.dumps(asdict(payload), sort_keys=True) + "\n"
         else:

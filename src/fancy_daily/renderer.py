@@ -7,8 +7,16 @@ from .parser import DailyEntry
 
 
 def render_csv(entry: DailyEntry) -> str:
+    return _render_delimited(entry, delimiter=",")
+
+
+def render_tsv(entry: DailyEntry) -> str:
+    return _render_delimited(entry, delimiter="\t")
+
+
+def _render_delimited(entry: DailyEntry, delimiter: str) -> str:
     output = io.StringIO()
-    writer = csv.writer(output, lineterminator="\n")
+    writer = csv.writer(output, delimiter=delimiter, lineterminator="\n")
     writer.writerow(("date", "section", "index", "item"))
 
     for section, items in (

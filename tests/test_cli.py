@@ -236,6 +236,38 @@ class CliTests(unittest.TestCase):
             ),
         )
 
+    def test_parse_command_outputs_tsv_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-09-04",
+                        "Highlights:",
+                        "- Exported TSV rows",
+                        "Follow-ups:",
+                        "- Paste into spreadsheet",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "tsv", str(note)])
+
+        self.assertEqual(
+            stdout.getvalue(),
+            "\n".join(
+                [
+                    "date\tsection\tindex\titem",
+                    "2026-09-04\thighlights\t1\tExported TSV rows",
+                    "2026-09-04\tfollow_ups\t1\tPaste into spreadsheet",
+                    "",
+                ]
+            ),
+        )
+
     def test_parse_command_accepts_text_format_aliases(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"
