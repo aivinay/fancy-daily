@@ -108,6 +108,14 @@ class MarkdownRendererTests(unittest.TestCase):
             ),
         )
 
+    def test_renders_csv_without_header(self) -> None:
+        entry = parse_daily_note("Date: 2026-09-05\nHighlights:\n- Appended clean row")
+
+        self.assertEqual(
+            render_csv(entry, include_header=False),
+            "2026-09-05,highlights,1,Appended clean row\n",
+        )
+
     def test_renders_tsv_section_rows(self) -> None:
         entry = parse_daily_note(
             """

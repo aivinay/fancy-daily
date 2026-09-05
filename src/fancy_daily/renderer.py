@@ -6,18 +6,21 @@ import io
 from .parser import DailyEntry
 
 
-def render_csv(entry: DailyEntry) -> str:
-    return _render_delimited(entry, delimiter=",")
+def render_csv(entry: DailyEntry, *, include_header: bool = True) -> str:
+    return _render_delimited(entry, delimiter=",", include_header=include_header)
 
 
-def render_tsv(entry: DailyEntry) -> str:
-    return _render_delimited(entry, delimiter="\t")
+def render_tsv(entry: DailyEntry, *, include_header: bool = True) -> str:
+    return _render_delimited(entry, delimiter="\t", include_header=include_header)
 
 
-def _render_delimited(entry: DailyEntry, delimiter: str) -> str:
+def _render_delimited(
+    entry: DailyEntry, delimiter: str, *, include_header: bool
+) -> str:
     output = io.StringIO()
     writer = csv.writer(output, delimiter=delimiter, lineterminator="\n")
-    writer.writerow(("date", "section", "index", "item"))
+    if include_header:
+        writer.writerow(("date", "section", "index", "item"))
 
     for section, items in (
         ("highlights", entry.highlights),

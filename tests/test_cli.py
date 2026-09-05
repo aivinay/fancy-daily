@@ -268,6 +268,29 @@ class CliTests(unittest.TestCase):
             ),
         )
 
+    def test_parse_command_omits_delimited_header(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-09-05",
+                        "Highlights:",
+                        "- Appended one CSV row",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "csv", "--no-header", str(note)])
+
+        self.assertEqual(
+            stdout.getvalue(),
+            "2026-09-05,highlights,1,Appended one CSV row\n",
+        )
+
     def test_parse_command_accepts_text_format_aliases(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

@@ -53,6 +53,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         type=Path,
         help="Write output to a file instead of stdout.",
     )
+    parse.add_argument(
+        "--no-header",
+        action="store_true",
+        help="Omit the header row for csv and tsv output.",
+    )
 
     args = parser.parse_args(argv)
     if args.command == "parse":
@@ -63,9 +68,9 @@ def main(argv: Sequence[str] | None = None) -> None:
         elif args.format in {"text", "txt", "plain"}:
             output = render_text(payload)
         elif args.format == "csv":
-            output = render_csv(payload)
+            output = render_csv(payload, include_header=not args.no_header)
         elif args.format == "tsv":
-            output = render_tsv(payload)
+            output = render_tsv(payload, include_header=not args.no_header)
         elif args.format in {"compact-json", "compact"}:
             output = json.dumps(asdict(payload), sort_keys=True) + "\n"
         else:

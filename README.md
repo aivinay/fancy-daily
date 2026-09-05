@@ -77,6 +77,7 @@ in scripts or logs.
 Use `--format csv` for spreadsheet-friendly rows with `date`, `section`,
 `index`, and `item` columns.
 Use `--format tsv` for the same row layout with tab-separated columns.
+Add `--no-header` with `csv` or `tsv` when appending rows to an existing file.
 
 Check the installed CLI version:
 
