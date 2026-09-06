@@ -38,7 +38,7 @@ Supported sections are:
 - `Notes`, `Note`, `Reflections`, `Reflection`, `Thoughts`, `Thought`,
   `Lessons`, `Lesson`, `Learnings`, `Learning`, `Ideas`, `Idea`, `Decisions`,
   `Decision`, `Summaries`, `Summary`, `Reviews`, `Review`, `Retrospectives`,
-  `Retrospective`, `Gratitude`, `Thanks`
+  `Retrospective`, `Questions`, `Question`, `Gratitude`, `Thanks`
 
 Section labels may be written on their own line or inline with a value, such as
 `Highlights: Finished the parser update`. Unlabeled lines are treated as notes.

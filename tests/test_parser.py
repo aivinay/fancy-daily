@@ -517,6 +517,23 @@ class DailyParserTests(unittest.TestCase):
             ("Try a weekly rollup command", "Keep summaries easy to scan"),
         )
 
+    def test_accepts_question_note_aliases(self) -> None:
+        entry = parse_daily_note(
+            """
+            Questions:
+            - Should the weekly rollup group by section?
+            Question: What output should the review command prefer?
+            """
+        )
+
+        self.assertEqual(
+            entry.notes,
+            (
+                "Should the weekly rollup group by section?",
+                "What output should the review command prefer?",
+            ),
+        )
+
     def test_accepts_gratitude_note_aliases(self) -> None:
         entry = parse_daily_note(
             """
