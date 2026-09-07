@@ -29,6 +29,14 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.blockers, ("Need CLI next",))
         self.assertEqual(entry.follow_ups, ("Add markdown output",))
         self.assertEqual(entry.notes, ("Keep the format lightweight.",))
+        self.assertFalse(entry.is_empty)
+        self.assertEqual(entry.total_items, 5)
+
+    def test_exposes_empty_entry_helpers(self) -> None:
+        entry = parse_daily_note("Date: 2026-09-07")
+
+        self.assertTrue(entry.is_empty)
+        self.assertEqual(entry.total_items, 0)
 
     def test_defaults_unlabeled_lines_to_notes(self) -> None:
         entry = parse_daily_note("Loose thought\n- Another note")

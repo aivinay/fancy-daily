@@ -40,7 +40,7 @@ def render_markdown(entry: DailyEntry) -> str:
     lines.append(f"# {title}")
     lines.append("")
 
-    if not any((entry.highlights, entry.blockers, entry.follow_ups, entry.notes)):
+    if entry.is_empty:
         lines.append("_No entries recorded._")
         lines.append("")
         return "\n".join(lines).rstrip() + "\n"
@@ -60,7 +60,7 @@ def render_text(entry: DailyEntry) -> str:
     lines.append("=" * len(title))
     lines.append("")
 
-    if not any((entry.highlights, entry.blockers, entry.follow_ups, entry.notes)):
+    if entry.is_empty:
         lines.append("No entries recorded.")
         lines.append("")
         return "\n".join(lines).rstrip() + "\n"

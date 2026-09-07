@@ -117,6 +117,8 @@ tracebacks.
 
 When a note has a date but no section entries, Markdown output keeps the date
 heading and renders `_No entries recorded._` so empty daily logs are explicit.
+Library callers can use `DailyEntry.is_empty` and `DailyEntry.total_items` for
+quick summary checks after parsing.
 
 ## Development
 

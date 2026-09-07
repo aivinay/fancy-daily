@@ -92,6 +92,19 @@ class DailyEntry:
     follow_ups: tuple[str, ...]
     notes: tuple[str, ...]
 
+    @property
+    def is_empty(self) -> bool:
+        return self.total_items == 0
+
+    @property
+    def total_items(self) -> int:
+        return (
+            len(self.highlights)
+            + len(self.blockers)
+            + len(self.follow_ups)
+            + len(self.notes)
+        )
+
 
 def parse_daily_note(text: str) -> DailyEntry:
     date: str | None = None
