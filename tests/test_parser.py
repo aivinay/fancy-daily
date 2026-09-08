@@ -31,12 +31,30 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.notes, ("Keep the format lightweight.",))
         self.assertFalse(entry.is_empty)
         self.assertEqual(entry.total_items, 5)
+        self.assertEqual(
+            entry.section_counts,
+            {
+                "highlights": 2,
+                "blockers": 1,
+                "follow_ups": 1,
+                "notes": 1,
+            },
+        )
 
     def test_exposes_empty_entry_helpers(self) -> None:
         entry = parse_daily_note("Date: 2026-09-07")
 
         self.assertTrue(entry.is_empty)
         self.assertEqual(entry.total_items, 0)
+        self.assertEqual(
+            entry.section_counts,
+            {
+                "highlights": 0,
+                "blockers": 0,
+                "follow_ups": 0,
+                "notes": 0,
+            },
+        )
 
     def test_defaults_unlabeled_lines_to_notes(self) -> None:
         entry = parse_daily_note("Loose thought\n- Another note")

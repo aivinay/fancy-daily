@@ -98,12 +98,16 @@ class DailyEntry:
 
     @property
     def total_items(self) -> int:
-        return (
-            len(self.highlights)
-            + len(self.blockers)
-            + len(self.follow_ups)
-            + len(self.notes)
-        )
+        return sum(self.section_counts.values())
+
+    @property
+    def section_counts(self) -> dict[str, int]:
+        return {
+            "highlights": len(self.highlights),
+            "blockers": len(self.blockers),
+            "follow_ups": len(self.follow_ups),
+            "notes": len(self.notes),
+        }
 
 
 def parse_daily_note(text: str) -> DailyEntry:
