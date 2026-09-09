@@ -58,11 +58,18 @@ def main(argv: Sequence[str] | None = None) -> None:
         action="store_true",
         help="Omit the header row for csv and tsv output.",
     )
+    parse.add_argument(
+        "--require-date",
+        action="store_true",
+        help="Fail when the note does not include a parseable date.",
+    )
 
     args = parser.parse_args(argv)
     if args.command == "parse":
         note_text = _read_note_text(args.note_file, parser)
         payload = parse_daily_note(note_text)
+        if args.require_date and payload.date is None:
+            parser.error("daily note is missing a date")
         if args.format in {"markdown", "md"}:
             output = render_markdown(payload)
         elif args.format in {"text", "txt", "plain"}:

@@ -100,6 +100,8 @@ cat daily.txt | PYTHONPATH=src python3 -m fancy_daily.cli parse -
 When no file path is provided, `parse` also reads from standard input.
 Missing input files are reported as command-line errors instead of Python
 tracebacks.
+Use `--require-date` when a pipeline should reject notes that do not include a
+parseable date.
 
 Write output to a file:
 

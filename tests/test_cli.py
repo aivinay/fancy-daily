@@ -118,6 +118,31 @@ class CliTests(unittest.TestCase):
         self.assertIn("unable to read note file:", stderr.getvalue())
         self.assertIn(missing, stderr.getvalue())
 
+    def test_parse_command_requires_date_when_requested(self) -> None:
+        stderr = io.StringIO()
+        stdin = io.StringIO("Highlights:\n- Missing a date")
+
+        with (
+            patch("sys.stdin", stdin),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--require-date"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("daily note is missing a date", stderr.getvalue())
+
+    def test_parse_command_accepts_required_date(self) -> None:
+        stdout = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-09\nHighlights:\n- Has a date")
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse", "--require-date"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["date"], "2026-09-09")
+        self.assertEqual(payload["highlights"], ["Has a date"])
+
     def test_parse_command_outputs_empty_json_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"
