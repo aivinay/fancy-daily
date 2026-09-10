@@ -143,6 +143,31 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["date"], "2026-09-09")
         self.assertEqual(payload["highlights"], ["Has a date"])
 
+    def test_parse_command_requires_entry_when_requested(self) -> None:
+        stderr = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-10")
+
+        with (
+            patch("sys.stdin", stdin),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--require-entry"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("daily note has no parsed entries", stderr.getvalue())
+
+    def test_parse_command_accepts_required_entry(self) -> None:
+        stdout = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-10\nNotes:\n- Has content")
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse", "--require-entry"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["date"], "2026-09-10")
+        self.assertEqual(payload["notes"], ["Has content"])
+
     def test_parse_command_outputs_empty_json_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

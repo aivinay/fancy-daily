@@ -102,6 +102,8 @@ Missing input files are reported as command-line errors instead of Python
 tracebacks.
 Use `--require-date` when a pipeline should reject notes that do not include a
 parseable date.
+Use `--require-entry` when a pipeline should reject dated but otherwise empty
+notes.
 
 Write output to a file:
 

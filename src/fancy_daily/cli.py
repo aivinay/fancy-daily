@@ -63,6 +63,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         action="store_true",
         help="Fail when the note does not include a parseable date.",
     )
+    parse.add_argument(
+        "--require-entry",
+        action="store_true",
+        help="Fail when the note does not include any parsed entries.",
+    )
 
     args = parser.parse_args(argv)
     if args.command == "parse":
@@ -70,6 +75,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         payload = parse_daily_note(note_text)
         if args.require_date and payload.date is None:
             parser.error("daily note is missing a date")
+        if args.require_entry and payload.is_empty:
+            parser.error("daily note has no parsed entries")
         if args.format in {"markdown", "md"}:
             output = render_markdown(payload)
         elif args.format in {"text", "txt", "plain"}:
