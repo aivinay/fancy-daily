@@ -168,6 +168,52 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["date"], "2026-09-10")
         self.assertEqual(payload["notes"], ["Has content"])
 
+    def test_parse_command_requires_specific_section(self) -> None:
+        stderr = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-11\nNotes:\n- Has content")
+
+        with (
+            patch("sys.stdin", stdin),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--require-section", "highlights"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn(
+            "daily note is missing required section: highlights",
+            stderr.getvalue(),
+        )
+
+    def test_parse_command_accepts_required_sections(self) -> None:
+        stdout = io.StringIO()
+        stdin = io.StringIO(
+            "\n".join(
+                [
+                    "Date: 2026-09-11",
+                    "Highlights:",
+                    "- Has a win",
+                    "Follow-ups:",
+                    "- Has next step",
+                ]
+            )
+        )
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(
+                [
+                    "parse",
+                    "--require-section",
+                    "highlights",
+                    "--require-section",
+                    "follow_ups",
+                ]
+            )
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["highlights"], ["Has a win"])
+        self.assertEqual(payload["follow_ups"], ["Has next step"])
+
     def test_parse_command_outputs_empty_json_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

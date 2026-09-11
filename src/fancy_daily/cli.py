@@ -12,6 +12,9 @@ from .parser import parse_daily_note
 from .renderer import render_csv, render_markdown, render_text, render_tsv
 
 
+SECTION_NAMES = ("highlights", "blockers", "follow_ups", "notes")
+
+
 def main(argv: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="fancy-daily")
     parser.add_argument(
@@ -68,6 +71,13 @@ def main(argv: Sequence[str] | None = None) -> None:
         action="store_true",
         help="Fail when the note does not include any parsed entries.",
     )
+    parse.add_argument(
+        "--require-section",
+        action="append",
+        choices=SECTION_NAMES,
+        default=[],
+        help="Fail when a required section has no parsed entries.",
+    )
 
     args = parser.parse_args(argv)
     if args.command == "parse":
@@ -77,6 +87,9 @@ def main(argv: Sequence[str] | None = None) -> None:
             parser.error("daily note is missing a date")
         if args.require_entry and payload.is_empty:
             parser.error("daily note has no parsed entries")
+        for section in args.require_section:
+            if not getattr(payload, section):
+                parser.error(f"daily note is missing required section: {section}")
         if args.format in {"markdown", "md"}:
             output = render_markdown(payload)
         elif args.format in {"text", "txt", "plain"}:
