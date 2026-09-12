@@ -72,6 +72,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         help="Fail when the note does not include any parsed entries.",
     )
     parse.add_argument(
+        "--strict",
+        action="store_true",
+        help="Fail when the note is missing a date or parsed entries.",
+    )
+    parse.add_argument(
         "--require-section",
         action="append",
         choices=SECTION_NAMES,
@@ -83,9 +88,9 @@ def main(argv: Sequence[str] | None = None) -> None:
     if args.command == "parse":
         note_text = _read_note_text(args.note_file, parser)
         payload = parse_daily_note(note_text)
-        if args.require_date and payload.date is None:
+        if (args.require_date or args.strict) and payload.date is None:
             parser.error("daily note is missing a date")
-        if args.require_entry and payload.is_empty:
+        if (args.require_entry or args.strict) and payload.is_empty:
             parser.error("daily note has no parsed entries")
         for section in args.require_section:
             if not getattr(payload, section):

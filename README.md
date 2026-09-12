@@ -104,6 +104,8 @@ Use `--require-date` when a pipeline should reject notes that do not include a
 parseable date.
 Use `--require-entry` when a pipeline should reject dated but otherwise empty
 notes.
+Use `--strict` as a shortcut for requiring both a parseable date and at least
+one parsed entry.
 Use `--require-section highlights` to require a specific parsed section; repeat
 the option to require multiple sections.
 

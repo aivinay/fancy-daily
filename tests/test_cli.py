@@ -168,6 +168,45 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["date"], "2026-09-10")
         self.assertEqual(payload["notes"], ["Has content"])
 
+    def test_parse_command_strict_requires_date(self) -> None:
+        stderr = io.StringIO()
+        stdin = io.StringIO("Highlights:\n- Missing a date")
+
+        with (
+            patch("sys.stdin", stdin),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--strict"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("daily note is missing a date", stderr.getvalue())
+
+    def test_parse_command_strict_requires_entry(self) -> None:
+        stderr = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-12")
+
+        with (
+            patch("sys.stdin", stdin),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--strict"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("daily note has no parsed entries", stderr.getvalue())
+
+    def test_parse_command_accepts_strict_note(self) -> None:
+        stdout = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-12\nHighlights:\n- Has content")
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse", "--strict"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["date"], "2026-09-12")
+        self.assertEqual(payload["highlights"], ["Has content"])
+
     def test_parse_command_requires_specific_section(self) -> None:
         stderr = io.StringIO()
         stdin = io.StringIO("Date: 2026-09-11\nNotes:\n- Has content")
