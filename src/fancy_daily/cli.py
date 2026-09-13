@@ -83,6 +83,12 @@ def main(argv: Sequence[str] | None = None) -> None:
         default=[],
         help="Fail when a required section has no parsed entries.",
     )
+    parse.add_argument(
+        "--min-items",
+        type=int,
+        default=0,
+        help="Fail when fewer than this many entries are parsed.",
+    )
 
     args = parser.parse_args(argv)
     if args.command == "parse":
@@ -92,6 +98,13 @@ def main(argv: Sequence[str] | None = None) -> None:
             parser.error("daily note is missing a date")
         if (args.require_entry or args.strict) and payload.is_empty:
             parser.error("daily note has no parsed entries")
+        if args.min_items < 0:
+            parser.error("--min-items must be zero or greater")
+        if payload.total_items < args.min_items:
+            parser.error(
+                f"daily note has {payload.total_items} parsed entries; "
+                f"expected at least {args.min_items}"
+            )
         for section in args.require_section:
             if not getattr(payload, section):
                 parser.error(f"daily note is missing required section: {section}")

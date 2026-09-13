@@ -108,6 +108,8 @@ Use `--strict` as a shortcut for requiring both a parseable date and at least
 one parsed entry.
 Use `--require-section highlights` to require a specific parsed section; repeat
 the option to require multiple sections.
+Use `--min-items 3` when a pipeline should require a minimum number of parsed
+entries.
 
 Write output to a file:
 

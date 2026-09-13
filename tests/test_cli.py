@@ -253,6 +253,58 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["highlights"], ["Has a win"])
         self.assertEqual(payload["follow_ups"], ["Has next step"])
 
+    def test_parse_command_requires_minimum_items(self) -> None:
+        stderr = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-13\nHighlights:\n- One item")
+
+        with (
+            patch("sys.stdin", stdin),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--min-items", "2"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn(
+            "daily note has 1 parsed entries; expected at least 2",
+            stderr.getvalue(),
+        )
+
+    def test_parse_command_rejects_negative_minimum_items(self) -> None:
+        stderr = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-13\nHighlights:\n- One item")
+
+        with (
+            patch("sys.stdin", stdin),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--min-items", "-1"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("--min-items must be zero or greater", stderr.getvalue())
+
+    def test_parse_command_accepts_minimum_items(self) -> None:
+        stdout = io.StringIO()
+        stdin = io.StringIO(
+            "\n".join(
+                [
+                    "Date: 2026-09-13",
+                    "Highlights:",
+                    "- First item",
+                    "Notes:",
+                    "- Second item",
+                ]
+            )
+        )
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse", "--min-items", "2"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["highlights"], ["First item"])
+        self.assertEqual(payload["notes"], ["Second item"])
+
     def test_parse_command_outputs_empty_json_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"
