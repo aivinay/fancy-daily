@@ -78,6 +78,8 @@ Use `--format csv` for spreadsheet-friendly rows with `date`, `section`,
 `index`, and `item` columns.
 Use `--format tsv` for the same row layout with tab-separated columns.
 Add `--no-header` with `csv` or `tsv` when appending rows to an existing file.
+Use `--format stats-json` or `--format stats` to output only the parsed date,
+empty state, total item count, and per-section counts.
 
 Check the installed CLI version:
 

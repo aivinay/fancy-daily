@@ -455,6 +455,65 @@ class CliTests(unittest.TestCase):
             ),
         )
 
+    def test_parse_command_outputs_stats_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-09-14",
+                        "Highlights:",
+                        "- Added stats output",
+                        "Blockers:",
+                        "- Waiting on review",
+                        "Notes:",
+                        "- Counted sections",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "stats-json", str(note)])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(
+            payload,
+            {
+                "date": "2026-09-14",
+                "is_empty": False,
+                "section_counts": {
+                    "blockers": 1,
+                    "follow_ups": 0,
+                    "highlights": 1,
+                    "notes": 1,
+                },
+                "total_items": 3,
+            },
+        )
+
+    def test_parse_command_outputs_empty_stats_alias(self) -> None:
+        stdout = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-14")
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse", "--format", "stats"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["date"], "2026-09-14")
+        self.assertTrue(payload["is_empty"])
+        self.assertEqual(payload["total_items"], 0)
+        self.assertEqual(
+            payload["section_counts"],
+            {
+                "blockers": 0,
+                "follow_ups": 0,
+                "highlights": 0,
+                "notes": 0,
+            },
+        )
+
     def test_parse_command_omits_delimited_header(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

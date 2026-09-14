@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Sequence
 
 from . import __version__
-from .parser import parse_daily_note
+from .parser import DailyEntry, parse_daily_note
 from .renderer import render_csv, render_markdown, render_text, render_tsv
 
 
@@ -42,6 +42,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             "csv",
             "markdown",
             "md",
+            "stats-json",
+            "stats",
             "text",
             "txt",
             "plain",
@@ -116,6 +118,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             output = render_csv(payload, include_header=not args.no_header)
         elif args.format == "tsv":
             output = render_tsv(payload, include_header=not args.no_header)
+        elif args.format in {"stats-json", "stats"}:
+            output = json.dumps(_entry_stats(payload), indent=2, sort_keys=True) + "\n"
         elif args.format in {"compact-json", "compact"}:
             output = json.dumps(asdict(payload), sort_keys=True) + "\n"
         else:
@@ -125,6 +129,15 @@ def main(argv: Sequence[str] | None = None) -> None:
             _write_output(args.output, output, parser)
         else:
             print(output, end="")
+
+
+def _entry_stats(entry: DailyEntry) -> dict[str, object]:
+    return {
+        "date": entry.date,
+        "is_empty": entry.is_empty,
+        "section_counts": entry.section_counts,
+        "total_items": entry.total_items,
+    }
 
 
 def _read_note_text(note_file: str, parser: argparse.ArgumentParser) -> str:
