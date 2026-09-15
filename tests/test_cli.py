@@ -514,6 +514,47 @@ class CliTests(unittest.TestCase):
             },
         )
 
+    def test_parse_command_outputs_compact_stats_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "\n".join(
+                    [
+                        "Date: 2026-09-15",
+                        "Highlights:",
+                        "- Added compact stats output",
+                        "Follow-ups:",
+                        "- Wire into nightly summary",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--format", "compact-stats-json", str(note)])
+
+        self.assertEqual(
+            stdout.getvalue(),
+            (
+                '{"date": "2026-09-15", "is_empty": false, '
+                '"section_counts": {"blockers": 0, "follow_ups": 1, '
+                '"highlights": 1, "notes": 0}, "total_items": 2}\n'
+            ),
+        )
+
+    def test_parse_command_accepts_compact_stats_alias(self) -> None:
+        stdout = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-15\nNotes:\n- Count this")
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse", "--format", "compact-stats"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["date"], "2026-09-15")
+        self.assertEqual(payload["section_counts"]["notes"], 1)
+        self.assertEqual(payload["total_items"], 1)
+
     def test_parse_command_omits_delimited_header(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"

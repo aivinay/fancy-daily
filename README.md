@@ -80,6 +80,8 @@ Use `--format tsv` for the same row layout with tab-separated columns.
 Add `--no-header` with `csv` or `tsv` when appending rows to an existing file.
 Use `--format stats-json` or `--format stats` to output only the parsed date,
 empty state, total item count, and per-section counts.
+Use `--format compact-stats-json` or `--format compact-stats` for the same
+stats payload as single-line JSON in scripts or logs.
 
 Check the installed CLI version:
 

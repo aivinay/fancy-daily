@@ -44,6 +44,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             "md",
             "stats-json",
             "stats",
+            "compact-stats-json",
+            "compact-stats",
             "text",
             "txt",
             "plain",
@@ -120,6 +122,8 @@ def main(argv: Sequence[str] | None = None) -> None:
             output = render_tsv(payload, include_header=not args.no_header)
         elif args.format in {"stats-json", "stats"}:
             output = json.dumps(_entry_stats(payload), indent=2, sort_keys=True) + "\n"
+        elif args.format in {"compact-stats-json", "compact-stats"}:
+            output = json.dumps(_entry_stats(payload), sort_keys=True) + "\n"
         elif args.format in {"compact-json", "compact"}:
             output = json.dumps(asdict(payload), sort_keys=True) + "\n"
         else:
