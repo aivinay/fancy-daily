@@ -42,6 +42,8 @@ Supported sections are:
 
 Section labels may be written on their own line or inline with a value, such as
 `Highlights: Finished the parser update`. Unlabeled lines are treated as notes.
+Markdown emphasis around section labels is ignored, so labels such as
+`**Highlights:**`, `_Follow-ups:_`, and `` `Notes`: `` are recognized.
 Dates may be written as `Date: 2026-07-02`, as a plain `2026-07-02` line, or as
 a Markdown heading such as `# 2026-07-02`. Date labels, plain date lines, and
 date headings may include trailing title text, such as `# 2026-07-02 Friday

@@ -104,6 +104,26 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.highlights, ("Parsed markdown headings",))
         self.assertEqual(entry.follow_ups, ("Document heading support",))
 
+    def test_accepts_emphasized_markdown_section_labels(self) -> None:
+        entry = parse_daily_note(
+            """
+            Date: 2026-09-16
+            ## **Highlights**
+            - Parsed bold heading labels
+            **Blockers:** Waiting on one review
+            _Follow-ups:_ Send the rollout note
+            `Notes`: Keep labels readable in copied Markdown
+            """
+        )
+
+        self.assertEqual(entry.highlights, ("Parsed bold heading labels",))
+        self.assertEqual(entry.blockers, ("Waiting on one review",))
+        self.assertEqual(entry.follow_ups, ("Send the rollout note",))
+        self.assertEqual(
+            entry.notes,
+            ("Keep labels readable in copied Markdown",),
+        )
+
     def test_accepts_markdown_date_heading(self) -> None:
         entry = parse_daily_note(
             """

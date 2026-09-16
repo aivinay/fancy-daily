@@ -182,7 +182,11 @@ def _append_clean_item(
 
 
 def _normalize_section_name(line: str) -> str:
-    return line.lstrip("#").strip().rstrip(":").lower()
+    return _normalize_label(line.lstrip("#"))
+
+
+def _normalize_label(label: str) -> str:
+    return label.strip().strip("*_`").rstrip(":").strip().strip("*_`").lower()
 
 
 def _is_markdown_rule(line: str) -> bool:
@@ -199,8 +203,8 @@ def _split_inline_section(line: str) -> tuple[str, str] | None:
     if not separator or not value.strip():
         return None
 
-    normalized = label.strip().lower()
+    normalized = _normalize_label(label)
     if normalized not in SECTION_ALIASES:
         return None
 
-    return SECTION_ALIASES[normalized], value.strip()
+    return SECTION_ALIASES[normalized], value.strip().lstrip("*_`").strip()
