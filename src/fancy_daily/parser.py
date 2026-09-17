@@ -7,6 +7,7 @@ from dataclasses import dataclass
 ORDERED_ITEM_RE = re.compile(r"^\d+[.)]\s+")
 CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s*")
 DATE_LINE_RE = re.compile(r"^(?:#+\s+)?(?P<date>\d{4}-\d{2}-\d{2})(?:\s+.*)?$")
+HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 
 SECTION_ALIASES = {
     "accomplishment": "highlights",
@@ -120,7 +121,7 @@ def parse_daily_note(text: str) -> DailyEntry:
     }
     current_section = "notes"
 
-    for raw_line in text.splitlines():
+    for raw_line in HTML_COMMENT_RE.sub("", text).splitlines():
         line = raw_line.strip()
         if not line:
             continue

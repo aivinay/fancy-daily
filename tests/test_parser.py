@@ -255,6 +255,25 @@ class DailyParserTests(unittest.TestCase):
             ),
         )
 
+    def test_ignores_html_comments(self) -> None:
+        entry = parse_daily_note(
+            """
+            <!-- Keep these prompts in the template. -->
+            Highlights:
+            - Shipped comment filtering <!-- private context -->
+            <!--
+            Blockers:
+            - This template guidance is not a real blocker
+            -->
+            Follow-ups:
+            - Document the behavior
+            """
+        )
+
+        self.assertEqual(entry.highlights, ("Shipped comment filtering",))
+        self.assertEqual(entry.blockers, ())
+        self.assertEqual(entry.follow_ups, ("Document the behavior",))
+
     def test_accepts_inline_section_values(self) -> None:
         entry = parse_daily_note(
             """

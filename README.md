@@ -54,6 +54,8 @@ parsed items. Empty bullet or checkbox placeholders are ignored.
 This includes bare `-`, `*`, and `+` placeholder lines.
 Markdown horizontal rules such as `---`, `***`, `___`, and spaced forms like
 `- - -` are ignored.
+HTML comments are ignored, including multi-line template guidance and comments
+appended to otherwise visible items.
 
 ## Usage
 
