@@ -56,6 +56,8 @@ Markdown horizontal rules such as `---`, `***`, `___`, and spaced forms like
 `- - -` are ignored.
 HTML comments are ignored, including multi-line template guidance and comments
 appended to otherwise visible items.
+Markdown blockquote prefixes are removed before parsing, so quoted dates,
+section labels, and list items work like their unquoted forms.
 
 ## Usage
 

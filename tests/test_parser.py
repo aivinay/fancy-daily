@@ -274,6 +274,23 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.blockers, ())
         self.assertEqual(entry.follow_ups, ("Document the behavior",))
 
+    def test_accepts_markdown_blockquotes(self) -> None:
+        entry = parse_daily_note(
+            """
+            > Date: 2026-09-18
+            > ## Highlights
+            > - Parsed a quoted daily note
+            >> Blockers: Waiting on review
+            > Follow-ups:
+            > - Document blockquote support
+            """
+        )
+
+        self.assertEqual(entry.date, "2026-09-18")
+        self.assertEqual(entry.highlights, ("Parsed a quoted daily note",))
+        self.assertEqual(entry.blockers, ("Waiting on review",))
+        self.assertEqual(entry.follow_ups, ("Document blockquote support",))
+
     def test_accepts_inline_section_values(self) -> None:
         entry = parse_daily_note(
             """
