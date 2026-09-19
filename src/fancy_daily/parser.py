@@ -121,8 +121,9 @@ def parse_daily_note(text: str) -> DailyEntry:
         "notes": [],
     }
     current_section = "notes"
+    prepared_text = _without_yaml_front_matter(HTML_COMMENT_RE.sub("", text))
 
-    for raw_line in HTML_COMMENT_RE.sub("", text).splitlines():
+    for raw_line in prepared_text.splitlines():
         line = BLOCKQUOTE_PREFIX_RE.sub("", raw_line.strip())
         if not line:
             continue
@@ -198,6 +199,41 @@ def _is_markdown_rule(line: str) -> bool:
         and len(set(rule_chars)) == 1
         and rule_chars[0] in {"-", "*", "_"}
     )
+
+
+def _without_yaml_front_matter(text: str) -> str:
+    lines = text.splitlines()
+    first_content = next(
+        (index for index, line in enumerate(lines) if line.strip()),
+        None,
+    )
+    if first_content is None or lines[first_content].strip() != "---":
+        return text
+
+    closing = next(
+        (
+            index
+            for index in range(first_content + 1, len(lines))
+            if lines[index].strip() in {"---", "..."}
+        ),
+        None,
+    )
+    if closing is None:
+        return text
+
+    date_line = next(
+        (
+            line.strip()
+            for line in lines[first_content + 1 : closing]
+            if line.strip().lower().startswith("date:")
+        ),
+        None,
+    )
+    body = lines[:first_content]
+    if date_line is not None:
+        body.append(date_line)
+    body.extend(lines[closing + 1 :])
+    return "\n".join(body)
 
 
 def _split_inline_section(line: str) -> tuple[str, str] | None:

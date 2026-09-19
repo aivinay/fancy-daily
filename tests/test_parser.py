@@ -291,6 +291,27 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.blockers, ("Waiting on review",))
         self.assertEqual(entry.follow_ups, ("Document blockquote support",))
 
+    def test_ignores_yaml_front_matter_except_date(self) -> None:
+        entry = parse_daily_note(
+            """
+            ---
+            title: Friday review
+            date: 2026-09-19
+            tags:
+              - daily
+              - work
+            ---
+            Highlights:
+            - Parsed front matter cleanly
+            Notes:
+            - Metadata does not become note content
+            """
+        )
+
+        self.assertEqual(entry.date, "2026-09-19")
+        self.assertEqual(entry.highlights, ("Parsed front matter cleanly",))
+        self.assertEqual(entry.notes, ("Metadata does not become note content",))
+
     def test_accepts_inline_section_values(self) -> None:
         entry = parse_daily_note(
             """

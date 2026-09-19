@@ -58,6 +58,8 @@ HTML comments are ignored, including multi-line template guidance and comments
 appended to otherwise visible items.
 Markdown blockquote prefixes are removed before parsing, so quoted dates,
 section labels, and list items work like their unquoted forms.
+YAML front matter at the start of a note is ignored except for its `date` field,
+which is used as the entry date.
 
 ## Usage
 
