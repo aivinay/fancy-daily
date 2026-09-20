@@ -132,8 +132,7 @@ def parse_daily_note(text: str) -> DailyEntry:
 
         if line.lower().startswith("date:"):
             value = line.split(":", 1)[1].strip()
-            date_match = DATE_LINE_RE.match(value)
-            date = date_match.group("date") if date_match else value or None
+            date = _parse_date_value(value)
             continue
 
         date_match = DATE_LINE_RE.match(line)
@@ -174,6 +173,19 @@ def _clean_item(line: str) -> str:
     else:
         line = ORDERED_ITEM_RE.sub("", line, count=1).strip()
     return CHECKBOX_ITEM_RE.sub("", line, count=1).strip()
+
+
+def _parse_date_value(value: str) -> str | None:
+    normalized = value.strip()
+    if (
+        len(normalized) >= 2
+        and normalized[0] == normalized[-1]
+        and normalized[0] in {"'", '"'}
+    ):
+        normalized = normalized[1:-1].strip()
+
+    date_match = DATE_LINE_RE.match(normalized)
+    return date_match.group("date") if date_match else normalized or None
 
 
 def _append_clean_item(

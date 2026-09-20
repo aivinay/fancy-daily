@@ -189,6 +189,22 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.date, "2026-07-31")
         self.assertEqual(entry.highlights, ("Parsed titled date label",))
 
+    def test_accepts_quoted_date_values(self) -> None:
+        yaml_entry = parse_daily_note(
+            """
+            ---
+            date: "2026-09-20"
+            tags: [daily]
+            ---
+            Highlights:
+            - Parsed a quoted YAML date
+            """
+        )
+        labeled_entry = parse_daily_note("Date: '2026-09-21 Monday Review'")
+
+        self.assertEqual(yaml_entry.date, "2026-09-20")
+        self.assertEqual(labeled_entry.date, "2026-09-21")
+
     def test_cleans_checkbox_list_items(self) -> None:
         entry = parse_daily_note(
             """
