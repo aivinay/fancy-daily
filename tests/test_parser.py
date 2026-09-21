@@ -205,6 +205,27 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(yaml_entry.date, "2026-09-20")
         self.assertEqual(labeled_entry.date, "2026-09-21")
 
+    def test_extracts_date_from_iso_timestamps(self) -> None:
+        yaml_entry = parse_daily_note(
+            """
+            ---
+            date: 2026-09-21T08:30:00-04:00
+            ---
+            Highlights:
+            - Parsed a timestamp from front matter
+            """
+        )
+        plain_entry = parse_daily_note(
+            """
+            2026-09-22T12:15:00Z
+            Notes:
+            - Timestamp dates stay concise
+            """
+        )
+
+        self.assertEqual(yaml_entry.date, "2026-09-21")
+        self.assertEqual(plain_entry.date, "2026-09-22")
+
     def test_cleans_checkbox_list_items(self) -> None:
         entry = parse_daily_note(
             """

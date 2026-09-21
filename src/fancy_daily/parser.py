@@ -6,7 +6,9 @@ from dataclasses import dataclass
 
 ORDERED_ITEM_RE = re.compile(r"^\d+[.)]\s+")
 CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s*")
-DATE_LINE_RE = re.compile(r"^(?:#+\s+)?(?P<date>\d{4}-\d{2}-\d{2})(?:\s+.*)?$")
+DATE_LINE_RE = re.compile(
+    r"^(?:#+\s+)?(?P<date>\d{4}-\d{2}-\d{2})(?:(?:T|\s+).*)?$"
+)
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 BLOCKQUOTE_PREFIX_RE = re.compile(r"^(?:>\s*)+")
 
