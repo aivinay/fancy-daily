@@ -93,6 +93,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         default=0,
         help="Fail when fewer than this many entries are parsed.",
     )
+    parse.add_argument(
+        "--max-items",
+        type=int,
+        help="Fail when more than this many entries are parsed.",
+    )
 
     args = parser.parse_args(argv)
     if args.command == "parse":
@@ -108,6 +113,13 @@ def main(argv: Sequence[str] | None = None) -> None:
             parser.error(
                 f"daily note has {payload.total_items} parsed entries; "
                 f"expected at least {args.min_items}"
+            )
+        if args.max_items is not None and args.max_items < 0:
+            parser.error("--max-items must be zero or greater")
+        if args.max_items is not None and payload.total_items > args.max_items:
+            parser.error(
+                f"daily note has {payload.total_items} parsed entries; "
+                f"expected at most {args.max_items}"
             )
         for section in args.require_section:
             if not getattr(payload, section):

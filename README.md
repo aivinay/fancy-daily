@@ -126,6 +126,8 @@ Use `--require-section highlights` to require a specific parsed section; repeat
 the option to require multiple sections.
 Use `--min-items 3` when a pipeline should require a minimum number of parsed
 entries.
+Use `--max-items 10` when a pipeline should reject notes that exceed an entry
+limit.
 
 Write output to a file:
 

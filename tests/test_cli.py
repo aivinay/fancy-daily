@@ -305,6 +305,49 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["highlights"], ["First item"])
         self.assertEqual(payload["notes"], ["Second item"])
 
+    def test_parse_command_requires_maximum_items(self) -> None:
+        stderr = io.StringIO()
+        stdin = io.StringIO(
+            "Date: 2026-09-22\nHighlights:\n- First item\n- Second item"
+        )
+
+        with (
+            patch("sys.stdin", stdin),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--max-items", "1"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn(
+            "daily note has 2 parsed entries; expected at most 1",
+            stderr.getvalue(),
+        )
+
+    def test_parse_command_rejects_negative_maximum_items(self) -> None:
+        stderr = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-22")
+
+        with (
+            patch("sys.stdin", stdin),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--max-items", "-1"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("--max-items must be zero or greater", stderr.getvalue())
+
+    def test_parse_command_accepts_maximum_items(self) -> None:
+        stdout = io.StringIO()
+        stdin = io.StringIO("Date: 2026-09-22\nNotes:\n- One item")
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse", "--max-items", "1"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["notes"], ["One item"])
+
     def test_parse_command_outputs_empty_json_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"
