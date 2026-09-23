@@ -123,7 +123,9 @@ def parse_daily_note(text: str) -> DailyEntry:
         "notes": [],
     }
     current_section = "notes"
-    prepared_text = _without_yaml_front_matter(HTML_COMMENT_RE.sub("", text))
+    prepared_text = _without_yaml_front_matter(
+        HTML_COMMENT_RE.sub(lambda match: "\n" * match.group().count("\n"), text)
+    )
 
     for raw_line in prepared_text.splitlines():
         line = BLOCKQUOTE_PREFIX_RE.sub("", raw_line.strip())

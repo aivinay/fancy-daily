@@ -311,6 +311,13 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.blockers, ())
         self.assertEqual(entry.follow_ups, ("Document the behavior",))
 
+    def test_multiline_comments_keep_neighboring_items_separate(self) -> None:
+        entry = parse_daily_note(
+            "Highlights:\n- First item <!--\nprivate context\n-->- Second item"
+        )
+
+        self.assertEqual(entry.highlights, ("First item", "Second item"))
+
     def test_accepts_markdown_blockquotes(self) -> None:
         entry = parse_daily_note(
             """
