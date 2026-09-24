@@ -132,6 +132,20 @@ class CliTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 2)
         self.assertIn("daily note is missing a date", stderr.getvalue())
 
+    def test_parse_command_rejects_invalid_date_when_required(self) -> None:
+        stderr = io.StringIO()
+        stdin = io.StringIO("Date: 2026-02-30\nHighlights:\n- Has content")
+
+        with (
+            patch("sys.stdin", stdin),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--require-date"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("daily note is missing a date", stderr.getvalue())
+
     def test_parse_command_accepts_required_date(self) -> None:
         stdout = io.StringIO()
         stdin = io.StringIO("Date: 2026-09-09\nHighlights:\n- Has a date")

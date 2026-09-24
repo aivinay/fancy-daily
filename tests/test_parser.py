@@ -226,6 +226,17 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(yaml_entry.date, "2026-09-21")
         self.assertEqual(plain_entry.date, "2026-09-22")
 
+    def test_rejects_invalid_calendar_dates(self) -> None:
+        labeled = parse_daily_note("Date: 2026-02-30\nHighlights:\n- Kept this item")
+        plain = parse_daily_note("2026-13-01\nHighlights:\n- Kept this item")
+        arbitrary = parse_daily_note("Date: someday\nHighlights:\n- Kept this item")
+
+        self.assertIsNone(labeled.date)
+        self.assertIsNone(plain.date)
+        self.assertIsNone(arbitrary.date)
+        self.assertEqual(labeled.highlights, ("Kept this item",))
+        self.assertEqual(plain.highlights, ("Kept this item",))
+
     def test_cleans_checkbox_list_items(self) -> None:
         entry = parse_daily_note(
             """

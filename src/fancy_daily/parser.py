@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from datetime import date as calendar_date
 
 
 ORDERED_ITEM_RE = re.compile(r"^\d+[.)]\s+")
@@ -141,8 +142,10 @@ def parse_daily_note(text: str) -> DailyEntry:
 
         date_match = DATE_LINE_RE.match(line)
         if date is None and date_match:
-            date = date_match.group("date")
-            continue
+            parsed_date = _valid_calendar_date(date_match.group("date"))
+            if parsed_date is not None:
+                date = parsed_date
+                continue
 
         inline_section = _split_inline_section(line)
         if inline_section is not None:
@@ -189,7 +192,15 @@ def _parse_date_value(value: str) -> str | None:
         normalized = normalized[1:-1].strip()
 
     date_match = DATE_LINE_RE.match(normalized)
-    return date_match.group("date") if date_match else normalized or None
+    return _valid_calendar_date(date_match.group("date")) if date_match else None
+
+
+def _valid_calendar_date(value: str) -> str | None:
+    try:
+        calendar_date.fromisoformat(value)
+    except ValueError:
+        return None
+    return value
 
 
 def _append_clean_item(
