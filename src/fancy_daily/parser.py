@@ -248,6 +248,16 @@ def _without_yaml_front_matter(text: str) -> str:
     if closing is None:
         return text
 
+    first_body_line = next(
+        (line.strip() for line in lines[first_content + 1 : closing] if line.strip()),
+        "",
+    )
+    if (
+        _normalize_section_name(first_body_line) in SECTION_ALIASES
+        or _split_inline_section(first_body_line) is not None
+    ):
+        return text
+
     date_line = next(
         (
             line.strip()

@@ -367,6 +367,25 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.highlights, ("Parsed front matter cleanly",))
         self.assertEqual(entry.notes, ("Metadata does not become note content",))
 
+    def test_keeps_sections_between_horizontal_rules(self) -> None:
+        entry = parse_daily_note(
+            """
+            ---
+            Highlights:
+            - First item
+            ---
+            Notes: Second item
+            """
+        )
+        inline_entry = parse_daily_note(
+            "---\nHighlights: First item\n---\nNotes: Second item"
+        )
+
+        self.assertEqual(entry.highlights, ("First item",))
+        self.assertEqual(entry.notes, ("Second item",))
+        self.assertEqual(inline_entry.highlights, ("First item",))
+        self.assertEqual(inline_entry.notes, ("Second item",))
+
     def test_accepts_inline_section_values(self) -> None:
         entry = parse_daily_note(
             """
