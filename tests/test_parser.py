@@ -386,6 +386,16 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(inline_entry.highlights, ("First item",))
         self.assertEqual(inline_entry.notes, ("Second item",))
 
+    def test_keeps_freeform_notes_between_horizontal_rules(self) -> None:
+        entry = parse_daily_note(
+            "---\nA thought without a section\n- Another note\n---\nNotes: Last note"
+        )
+
+        self.assertEqual(
+            entry.notes,
+            ("A thought without a section", "Another note", "Last note"),
+        )
+
     def test_accepts_inline_section_values(self) -> None:
         entry = parse_daily_note(
             """

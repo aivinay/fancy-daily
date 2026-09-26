@@ -12,6 +12,7 @@ DATE_LINE_RE = re.compile(
 )
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 BLOCKQUOTE_PREFIX_RE = re.compile(r"^(?:>\s*)+")
+YAML_FIELD_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*\s*:")
 
 SECTION_ALIASES = {
     "accomplishment": "highlights",
@@ -253,7 +254,8 @@ def _without_yaml_front_matter(text: str) -> str:
         "",
     )
     if (
-        _normalize_section_name(first_body_line) in SECTION_ALIASES
+        not YAML_FIELD_RE.match(first_body_line)
+        or _normalize_section_name(first_body_line) in SECTION_ALIASES
         or _split_inline_section(first_body_line) is not None
     ):
         return text
