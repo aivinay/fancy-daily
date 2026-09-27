@@ -226,6 +226,15 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(yaml_entry.date, "2026-09-21")
         self.assertEqual(plain_entry.date, "2026-09-22")
 
+    def test_rejects_invalid_iso_timestamps(self) -> None:
+        labeled = parse_daily_note("Date: 2026-09-27T99:99:99")
+        plain = parse_daily_note("2026-09-27Tnot-a-time")
+        yaml_entry = parse_daily_note("---\ndate: 2026-09-27T25:00:00Z\n---")
+
+        self.assertIsNone(labeled.date)
+        self.assertIsNone(plain.date)
+        self.assertIsNone(yaml_entry.date)
+
     def test_rejects_invalid_calendar_dates(self) -> None:
         labeled = parse_daily_note("Date: 2026-02-30\nHighlights:\n- Kept this item")
         plain = parse_daily_note("2026-13-01\nHighlights:\n- Kept this item")

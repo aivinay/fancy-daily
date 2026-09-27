@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import date as calendar_date
+from datetime import date as calendar_date, datetime
 
 
 ORDERED_ITEM_RE = re.compile(r"^\d+[.)]\s+")
 CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s*")
 DATE_LINE_RE = re.compile(
-    r"^(?:#+\s+)?(?P<date>\d{4}-\d{2}-\d{2})(?:(?:T|\s+).*)?$"
+    r"^(?:#+\s+)?(?P<date>\d{4}-\d{2}-\d{2})(?P<suffix>(?:T|\s+).*)?$"
 )
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 BLOCKQUOTE_PREFIX_RE = re.compile(r"^(?:>\s*)+")
@@ -143,7 +143,7 @@ def parse_daily_note(text: str) -> DailyEntry:
 
         date_match = DATE_LINE_RE.match(line)
         if date is None and date_match:
-            parsed_date = _valid_calendar_date(date_match.group("date"))
+            parsed_date = _date_from_match(date_match)
             if parsed_date is not None:
                 date = parsed_date
                 continue
@@ -193,7 +193,18 @@ def _parse_date_value(value: str) -> str | None:
         normalized = normalized[1:-1].strip()
 
     date_match = DATE_LINE_RE.match(normalized)
-    return _valid_calendar_date(date_match.group("date")) if date_match else None
+    return _date_from_match(date_match) if date_match else None
+
+
+def _date_from_match(match: re.Match[str]) -> str | None:
+    value = _valid_calendar_date(match.group("date"))
+    suffix = match.group("suffix") or ""
+    if value is not None and suffix.startswith("T"):
+        try:
+            datetime.fromisoformat(value + suffix)
+        except ValueError:
+            return None
+    return value
 
 
 def _valid_calendar_date(value: str) -> str | None:

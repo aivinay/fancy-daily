@@ -51,7 +51,7 @@ Review`.
 Quoted date values are also accepted, including dates read from YAML front
 matter.
 ISO 8601 timestamps such as `2026-07-02T09:30:00Z` are normalized to their
-calendar date. Date values must be real calendar dates; invalid values leave
+calendar date. Date and timestamp values must be valid; invalid values leave
 the parsed date unset.
 Bullet items using `-`, `*`, `+`, `1.`, or `1)` are normalized before rendering.
 Markdown task list markers like `[ ]`, `[x]`, and `[X]` are also removed from
