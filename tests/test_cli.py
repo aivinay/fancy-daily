@@ -352,6 +352,20 @@ class CliTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 2)
         self.assertIn("--max-items must be zero or greater", stderr.getvalue())
 
+    def test_parse_command_rejects_conflicting_item_limits_before_reading(self) -> None:
+        stderr = io.StringIO()
+
+        with (
+            patch("sys.stdin") as stdin,
+            self.assertRaises(SystemExit) as raised,
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "--min-items", "3", "--max-items", "1"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertIn("--min-items cannot exceed --max-items", stderr.getvalue())
+        stdin.read.assert_not_called()
+
     def test_parse_command_accepts_maximum_items(self) -> None:
         stdout = io.StringIO()
         stdin = io.StringIO("Date: 2026-09-22\nNotes:\n- One item")

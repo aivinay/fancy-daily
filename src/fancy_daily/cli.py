@@ -101,21 +101,25 @@ def main(argv: Sequence[str] | None = None) -> None:
 
     args = parser.parse_args(argv)
     if args.command == "parse":
+        if args.min_items < 0:
+            parser.error("--min-items must be zero or greater")
+        if args.max_items is not None:
+            if args.max_items < 0:
+                parser.error("--max-items must be zero or greater")
+            if args.min_items > args.max_items:
+                parser.error("--min-items cannot exceed --max-items")
+
         note_text = _read_note_text(args.note_file, parser)
         payload = parse_daily_note(note_text)
         if (args.require_date or args.strict) and payload.date is None:
             parser.error("daily note is missing a date")
         if (args.require_entry or args.strict) and payload.is_empty:
             parser.error("daily note has no parsed entries")
-        if args.min_items < 0:
-            parser.error("--min-items must be zero or greater")
         if payload.total_items < args.min_items:
             parser.error(
                 f"daily note has {payload.total_items} parsed entries; "
                 f"expected at least {args.min_items}"
             )
-        if args.max_items is not None and args.max_items < 0:
-            parser.error("--max-items must be zero or greater")
         if args.max_items is not None and payload.total_items > args.max_items:
             parser.error(
                 f"daily note has {payload.total_items} parsed entries; "

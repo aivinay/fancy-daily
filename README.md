@@ -128,7 +128,7 @@ the option to require multiple sections.
 Use `--min-items 3` when a pipeline should require a minimum number of parsed
 entries.
 Use `--max-items 10` when a pipeline should reject notes that exceed an entry
-limit.
+limit. When used together, the minimum cannot exceed the maximum.
 
 Write output to a file:
 
