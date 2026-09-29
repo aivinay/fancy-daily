@@ -13,6 +13,7 @@ DATE_LINE_RE = re.compile(
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 BLOCKQUOTE_PREFIX_RE = re.compile(r"^(?:>\s*)+")
 YAML_FIELD_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*\s*:")
+FENCE_RE = re.compile(r"^(?P<marker>`{3,}|~{3,})(?:[^`~].*)?$")
 
 SECTION_ALIASES = {
     "accomplishment": "highlights",
@@ -125,12 +126,21 @@ def parse_daily_note(text: str) -> DailyEntry:
         "notes": [],
     }
     current_section = "notes"
+    fence_marker: str | None = None
     prepared_text = _without_yaml_front_matter(
         HTML_COMMENT_RE.sub(lambda match: "\n" * match.group().count("\n"), text)
     )
 
     for raw_line in prepared_text.splitlines():
         line = BLOCKQUOTE_PREFIX_RE.sub("", raw_line.strip())
+        fence = FENCE_RE.match(line)
+        if fence_marker is not None:
+            if fence and fence.group("marker")[0] == fence_marker[0] and len(fence.group("marker")) >= len(fence_marker):
+                fence_marker = None
+            continue
+        if fence:
+            fence_marker = fence.group("marker")
+            continue
         if not line:
             continue
         if _is_markdown_rule(line):

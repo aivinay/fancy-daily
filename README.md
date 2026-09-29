@@ -61,6 +61,8 @@ Markdown horizontal rules such as `---`, `***`, `___`, and spaced forms like
 `- - -` are ignored.
 HTML comments are ignored, including multi-line template guidance and comments
 appended to otherwise visible items.
+Fenced Markdown code blocks are ignored, so examples inside them do not create
+items or change sections.
 Markdown blockquote prefixes are removed before parsing, so quoted dates,
 section labels, and list items work like their unquoted forms.
 YAML front matter at the start of a note is ignored except for its `date` field,

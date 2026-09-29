@@ -331,6 +331,16 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.blockers, ())
         self.assertEqual(entry.follow_ups, ("Document the behavior",))
 
+    def test_ignores_fenced_code_without_changing_sections(self) -> None:
+        entry = parse_daily_note(
+            "Highlights:\n- Shipped parser\n```text\nBlockers:\n- Example only\n```\n- Kept parsing highlights\n~~~\nDate: 2026-09-29\n~~~\nNotes:\n- Real note"
+        )
+
+        self.assertIsNone(entry.date)
+        self.assertEqual(entry.highlights, ("Shipped parser", "Kept parsing highlights"))
+        self.assertEqual(entry.blockers, ())
+        self.assertEqual(entry.notes, ("Real note",))
+
     def test_multiline_comments_keep_neighboring_items_separate(self) -> None:
         entry = parse_daily_note(
             "Highlights:\n- First item <!--\nprivate context\n-->- Second item"
