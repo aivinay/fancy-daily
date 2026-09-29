@@ -226,6 +226,44 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(yaml_entry.date, "2026-09-21")
         self.assertEqual(plain_entry.date, "2026-09-22")
 
+    def test_extracts_date_from_utc_timestamps(self) -> None:
+        templates = (
+            "{timestamp}",
+            "# {timestamp}",
+            "Date: {timestamp}",
+            "Date: '{timestamp}'",
+            "---\ndate: {timestamp}\n---",
+            '---\ndate: "{timestamp}"\n---',
+        )
+        for timestamp in (
+            "2026-09-22T12:15:00Z",
+            "2026-09-22T12:15:00.123456Z",
+        ):
+            for template in templates:
+                with self.subTest(timestamp=timestamp, template=template):
+                    text = template.format(timestamp=timestamp)
+                    entry = parse_daily_note(text + "\nNotes:\n- Kept this note")
+
+                    self.assertEqual(entry.date, "2026-09-22")
+                    self.assertEqual(entry.notes, ("Kept this note",))
+
+    def test_rejects_malformed_utc_timestamps(self) -> None:
+        for timestamp in (
+            "2026-09-22T25:00:00Z",
+            "2026-09-22T12:15:00ZZ",
+            "2026-09-22T12:15:00Zjunk",
+            "2026-09-22T12:Z15:00",
+            "2026-09-22T12:15:00+01:00Z",
+        ):
+            for template in (
+                "{timestamp}",
+                "Date: {timestamp}",
+                "---\ndate: {timestamp}\n---",
+            ):
+                with self.subTest(timestamp=timestamp, template=template):
+                    entry = parse_daily_note(template.format(timestamp=timestamp))
+                    self.assertIsNone(entry.date)
+
     def test_rejects_invalid_iso_timestamps(self) -> None:
         labeled = parse_daily_note("Date: 2026-09-27T99:99:99")
         plain = parse_daily_note("2026-09-27Tnot-a-time")

@@ -210,8 +210,14 @@ def _date_from_match(match: re.Match[str]) -> str | None:
     value = _valid_calendar_date(match.group("date"))
     suffix = match.group("suffix") or ""
     if value is not None and suffix.startswith("T"):
+        timestamp = value + suffix
+        # Python 3.10 requires an explicit UTC offset instead of "Z".
+        if timestamp.endswith("Z"):
+            timestamp = timestamp[:-1] + "+00:00"
+        if "Z" in timestamp:
+            return None
         try:
-            datetime.fromisoformat(value + suffix)
+            datetime.fromisoformat(timestamp)
         except ValueError:
             return None
     return value
