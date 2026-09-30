@@ -135,7 +135,12 @@ def parse_daily_note(text: str) -> DailyEntry:
         line = BLOCKQUOTE_PREFIX_RE.sub("", raw_line.strip())
         fence = FENCE_RE.match(line)
         if fence_marker is not None:
-            if fence and fence.group("marker")[0] == fence_marker[0] and len(fence.group("marker")) >= len(fence_marker):
+            if (
+                fence
+                and line == fence.group("marker")
+                and line[0] == fence_marker[0]
+                and len(line) >= len(fence_marker)
+            ):
                 fence_marker = None
             continue
         if fence:

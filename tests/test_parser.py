@@ -379,6 +379,49 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.blockers, ())
         self.assertEqual(entry.notes, ("Real note",))
 
+    def test_fenced_code_does_not_close_with_trailing_text(self) -> None:
+        for marker in ("```", "~~~"):
+            for suffix in ("example", " trailing text", "\ttrailing text"):
+                with self.subTest(marker=marker, suffix=suffix):
+                    entry = parse_daily_note(
+                        "Highlights:\n- Real before\n"
+                        f"{marker}text\n{marker}{suffix}\n"
+                        "Date: 2026-09-30\nBlockers:\n- Example only\n"
+                        f"{marker}\n- Real after"
+                    )
+
+                    self.assertIsNone(entry.date)
+                    self.assertEqual(entry.highlights, ("Real before", "Real after"))
+                    self.assertEqual(entry.blockers, ())
+                    self.assertEqual(entry.total_items, 2)
+
+    def test_fenced_code_requires_a_matching_closing_marker(self) -> None:
+        for marker, other in (("`", "~"), ("~", "`")):
+            for closing_length in (4, 5):
+                with self.subTest(marker=marker, closing_length=closing_length):
+                    entry = parse_daily_note(
+                        "Notes:\n- Real before\n"
+                        f"{marker * 4}text\n{marker * 3}\n{other * 4}\n"
+                        "- Example only\n"
+                        f"{marker * closing_length} \t\n- Real after"
+                    )
+
+                    self.assertEqual(entry.notes, ("Real before", "Real after"))
+                    self.assertEqual(entry.total_items, 2)
+
+    def test_unterminated_fenced_code_ignores_remaining_lines(self) -> None:
+        for marker in ("```", "~~~"):
+            with self.subTest(marker=marker):
+                entry = parse_daily_note(
+                    "Highlights:\n- Real item\n"
+                    f"{marker}text\n{marker}not-a-close\n"
+                    "Blockers:\n- Example only"
+                )
+
+                self.assertEqual(entry.highlights, ("Real item",))
+                self.assertEqual(entry.blockers, ())
+                self.assertEqual(entry.total_items, 1)
+
     def test_multiline_comments_keep_neighboring_items_separate(self) -> None:
         entry = parse_daily_note(
             "Highlights:\n- First item <!--\nprivate context\n-->- Second item"
