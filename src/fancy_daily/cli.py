@@ -161,13 +161,16 @@ def _entry_stats(entry: DailyEntry) -> dict[str, object]:
 
 
 def _read_note_text(note_file: str, parser: argparse.ArgumentParser) -> str:
-    if note_file == "-":
-        return sys.stdin.read()
-
     try:
+        if note_file == "-":
+            return sys.stdin.read()
         return Path(note_file).read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        source = "stdin" if note_file == "-" else f"note file {note_file!r}"
+        parser.error(f"unable to decode {source} using {exc.encoding}: {exc.reason}")
     except OSError as exc:
-        parser.error(f"unable to read note file: {exc}")
+        source = "stdin" if note_file == "-" else "note file"
+        parser.error(f"unable to read {source}: {exc}")
 
 
 def _write_output(

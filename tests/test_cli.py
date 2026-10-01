@@ -118,6 +118,74 @@ class CliTests(unittest.TestCase):
         self.assertIn("unable to read note file:", stderr.getvalue())
         self.assertIn(missing, stderr.getvalue())
 
+    def test_parse_command_reports_invalid_utf8_file_without_changing_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            output = Path(tmpdir) / "summary.json"
+            note.write_bytes(b"Notes:\n- Invalid byte: \xff")
+            output.write_text("previous summary\n", encoding="utf-8")
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+
+            with (
+                self.assertRaises(SystemExit) as raised,
+                redirect_stdout(stdout),
+                redirect_stderr(stderr),
+            ):
+                main(["parse", str(note), "--output", str(output)])
+
+            self.assertEqual(output.read_text(encoding="utf-8"), "previous summary\n")
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertIn("unable to decode note file", stderr.getvalue())
+        self.assertIn(str(note), stderr.getvalue())
+        self.assertIn("utf-8", stderr.getvalue())
+
+    def test_parse_command_reports_stdin_decoding_errors(self) -> None:
+        for arguments in (["parse"], ["parse", "-"]):
+            with self.subTest(arguments=arguments):
+                stdout = io.StringIO()
+                stderr = io.StringIO()
+                with (
+                    io.TextIOWrapper(io.BytesIO(b"Notes:\n- \xff"), encoding="utf-8") as stdin,
+                    patch("sys.stdin", stdin),
+                    self.assertRaises(SystemExit) as raised,
+                    redirect_stdout(stdout),
+                    redirect_stderr(stderr),
+                ):
+                    main(arguments)
+
+                self.assertEqual(raised.exception.code, 2)
+                self.assertEqual(stdout.getvalue(), "")
+                self.assertIn("unable to decode stdin", stderr.getvalue())
+                self.assertIn("utf-8", stderr.getvalue())
+
+    def test_parse_command_reports_stdin_read_errors(self) -> None:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with (
+            patch("sys.stdin.read", side_effect=OSError("input stream unavailable")),
+            self.assertRaises(SystemExit) as raised,
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "-"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertIn("unable to read stdin: input stream unavailable", stderr.getvalue())
+
+    def test_parse_command_preserves_utf8_file_contents(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text("Notes:\n- Caf\u00e9 review", encoding="utf-8")
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", str(note)])
+
+        self.assertEqual(json.loads(stdout.getvalue())["notes"], ["Caf\u00e9 review"])
+
     def test_parse_command_requires_date_when_requested(self) -> None:
         stderr = io.StringIO()
         stdin = io.StringIO("Highlights:\n- Missing a date")
