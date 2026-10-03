@@ -186,6 +186,34 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(json.loads(stdout.getvalue())["notes"], ["Caf\u00e9 review"])
 
+    def test_parse_command_accepts_utf8_bom_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            note = Path(tmpdir) / "daily.txt"
+            note.write_text(
+                "Date: 2026-10-03\nHighlights:\n- Shipped work",
+                encoding="utf-8-sig",
+            )
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                main(["parse", "--strict", str(note)])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["date"], "2026-10-03")
+        self.assertEqual(payload["highlights"], ["Shipped work"])
+        self.assertEqual(payload["notes"], [])
+
+    def test_parse_command_accepts_bom_on_stdin(self) -> None:
+        for arguments in (["parse", "--strict"], ["parse", "--strict", "-"]):
+            with self.subTest(arguments=arguments):
+                stdin = io.StringIO("\ufeffDate: 2026-10-03\nNotes:\n- Shipped work")
+                stdout = io.StringIO()
+                with patch("sys.stdin", stdin), redirect_stdout(stdout):
+                    main(arguments)
+
+                payload = json.loads(stdout.getvalue())
+                self.assertEqual(payload["date"], "2026-10-03")
+                self.assertEqual(payload["notes"], ["Shipped work"])
+
     def test_parse_command_requires_date_when_requested(self) -> None:
         stderr = io.StringIO()
         stdin = io.StringIO("Highlights:\n- Missing a date")

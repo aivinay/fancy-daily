@@ -56,6 +56,32 @@ class DailyParserTests(unittest.TestCase):
             },
         )
 
+    def test_accepts_a_leading_byte_order_mark(self) -> None:
+        for preamble, expected_date in (
+            ("Date: 2026-10-03\n", "2026-10-03"),
+            ("2026-10-03\n", "2026-10-03"),
+            ("# 2026-10-03\n", "2026-10-03"),
+            ("---\ntitle: Daily review\ndate: 2026-10-03\n---\n", "2026-10-03"),
+            ("", None),
+        ):
+            with self.subTest(preamble=preamble):
+                entry = parse_daily_note("\ufeff" + preamble + "Highlights:\n- Shipped work")
+
+                self.assertEqual(entry.date, expected_date)
+                self.assertEqual(entry.highlights, ("Shipped work",))
+                self.assertEqual(entry.total_items, 1)
+
+    def test_byte_order_mark_only_note_is_empty(self) -> None:
+        entry = parse_daily_note("\ufeff")
+
+        self.assertIsNone(entry.date)
+        self.assertTrue(entry.is_empty)
+
+    def test_preserves_embedded_byte_order_mark_in_note_text(self) -> None:
+        entry = parse_daily_note("\ufeffNotes:\n- Left\ufeffRight")
+
+        self.assertEqual(entry.notes, ("Left\ufeffRight",))
+
     def test_defaults_unlabeled_lines_to_notes(self) -> None:
         entry = parse_daily_note("Loose thought\n- Another note")
 

@@ -119,9 +119,11 @@ cat daily.txt | PYTHONPATH=src python3 -m fancy_daily.cli parse -
 ```
 
 When no file path is provided, `parse` also reads from standard input.
-Note files must be UTF-8 encoded. Missing files, invalid file encoding, and stdin
-read or decoding failures are reported as command-line errors with exit status 2
-instead of Python tracebacks. Failed input reads do not write to the output file.
+Note files must be UTF-8 encoded. A single leading byte-order mark (BOM) is
+ignored for file, stdin, and library input.
+Missing files, invalid file encoding, and stdin read or decoding failures are
+reported as command-line errors with exit status 2 instead of Python tracebacks.
+Failed input reads do not write to the output file.
 Use `--require-date` when a pipeline should reject notes that do not include a
 parseable date.
 Use `--require-entry` when a pipeline should reject dated but otherwise empty

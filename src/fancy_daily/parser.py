@@ -118,6 +118,7 @@ class DailyEntry:
 
 
 def parse_daily_note(text: str) -> DailyEntry:
+    text = text.removeprefix("\ufeff")
     date: str | None = None
     sections: dict[str, list[str]] = {
         "highlights": [],
