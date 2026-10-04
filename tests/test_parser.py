@@ -407,7 +407,9 @@ class DailyParserTests(unittest.TestCase):
 
     def test_fenced_code_does_not_close_with_trailing_text(self) -> None:
         for marker in ("```", "~~~"):
-            for suffix in ("example", " trailing text", "\ttrailing text"):
+            for suffix in (
+                "example", " trailing text", "\ttrailing text", " <!-- not a close -->"
+            ):
                 with self.subTest(marker=marker, suffix=suffix):
                     entry = parse_daily_note(
                         "Highlights:\n- Real before\n"
@@ -454,6 +456,72 @@ class DailyParserTests(unittest.TestCase):
         )
 
         self.assertEqual(entry.highlights, ("First item", "Second item"))
+
+    def test_comment_openers_in_code_do_not_hide_following_items(self) -> None:
+        for marker in ("```", "~~~"):
+            for prefix in ("", "> "):
+                with self.subTest(marker=marker, prefix=prefix):
+                    lines = (
+                        "Highlights:",
+                        "- Before",
+                        f"{marker}html",
+                        "<!-- example opener",
+                        marker,
+                        "- After",
+                        "<!-- template -->",
+                        "Blockers:",
+                        "- Real blocker",
+                    )
+                    entry = parse_daily_note(
+                        "\n".join(prefix + line for line in lines)
+                    )
+
+                    self.assertEqual(entry.highlights, ("Before", "After"))
+                    self.assertEqual(entry.blockers, ("Real blocker",))
+                    self.assertEqual(entry.total_items, 3)
+
+    def test_comment_markers_in_fence_info_do_not_hide_following_items(self) -> None:
+        for marker in ("```", "~~~"):
+            with self.subTest(marker=marker):
+                entry = parse_daily_note(
+                    f"{marker}html <!-- example\n- Hidden\n{marker}\n"
+                    "Notes:\n- Visible\n<!-- template -->"
+                )
+
+                self.assertEqual(entry.notes, ("Visible",))
+                self.assertEqual(entry.total_items, 1)
+
+    def test_fences_inside_comments_do_not_hide_following_items(self) -> None:
+        for marker in ("```", "~~~"):
+            with self.subTest(marker=marker):
+                entry = parse_daily_note(
+                    f"<!--\n{marker}text\nBlockers:\n- Hidden\n-->\n"
+                    "Highlights:\n- Visible"
+                )
+
+                self.assertEqual(entry.highlights, ("Visible",))
+                self.assertEqual(entry.blockers, ())
+                self.assertEqual(entry.total_items, 1)
+
+    def test_unterminated_comments_ignore_remaining_lines(self) -> None:
+        entry = parse_daily_note(
+            "Highlights:\n- Visible <!-- unfinished\n```\n"
+            "Date: 2026-10-04\nBlockers:\n- Hidden"
+        )
+
+        self.assertIsNone(entry.date)
+        self.assertEqual(entry.highlights, ("Visible",))
+        self.assertEqual(entry.blockers, ())
+        self.assertEqual(entry.total_items, 1)
+
+    def test_comments_can_precede_fences_on_the_same_line(self) -> None:
+        entry = parse_daily_note(
+            "<!-- template --> ```html\n<!-- example\n```\n"
+            "Notes: Visible <!-- one --><!-- two --> tail"
+        )
+
+        self.assertEqual(entry.notes, ("Visible  tail",))
+        self.assertEqual(entry.total_items, 1)
 
     def test_accepts_markdown_blockquotes(self) -> None:
         entry = parse_daily_note(

@@ -10,7 +10,6 @@ CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s*")
 DATE_LINE_RE = re.compile(
     r"^(?:#+\s+)?(?P<date>\d{4}-\d{2}-\d{2})(?P<suffix>(?:T|\s+).*)?$"
 )
-HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 BLOCKQUOTE_PREFIX_RE = re.compile(r"^(?:>\s*)+")
 YAML_FIELD_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*\s*:")
 FENCE_RE = re.compile(r"^(?P<marker>`{3,}|~{3,})(?:[^`~].*)?$")
@@ -128,20 +127,13 @@ def parse_daily_note(text: str) -> DailyEntry:
     }
     current_section = "notes"
     fence_marker: str | None = None
-    prepared_text = _without_yaml_front_matter(
-        HTML_COMMENT_RE.sub(lambda match: "\n" * match.group().count("\n"), text)
-    )
+    prepared_text = _without_yaml_front_matter(_without_html_comments(text))
 
     for raw_line in prepared_text.splitlines():
         line = BLOCKQUOTE_PREFIX_RE.sub("", raw_line.strip())
         fence = FENCE_RE.match(line)
         if fence_marker is not None:
-            if (
-                fence
-                and line == fence.group("marker")
-                and line[0] == fence_marker[0]
-                and len(line) >= len(fence_marker)
-            ):
+            if _is_closing_fence(line, fence_marker):
                 fence_marker = None
             continue
         if fence:
@@ -184,6 +176,47 @@ def parse_daily_note(text: str) -> DailyEntry:
         follow_ups=tuple(sections["follow_ups"]),
         notes=tuple(sections["notes"]),
     )
+
+
+def _is_closing_fence(line: str, marker: str) -> bool:
+    return line.startswith(marker) and not line.strip(marker[0])
+
+
+def _without_html_comments(text: str) -> str:
+    lines: list[str] = []
+    in_comment = False
+    fence_marker: str | None = None
+    for raw_line in text.splitlines():
+        if fence_marker is not None:
+            line = BLOCKQUOTE_PREFIX_RE.sub("", raw_line.strip())
+            if _is_closing_fence(line, fence_marker):
+                fence_marker = None
+            lines.append(raw_line)
+            continue
+
+        visible: list[str] = []
+        remainder = raw_line
+        while remainder:
+            if in_comment:
+                _, closing, remainder = remainder.partition("-->")
+                if not closing:
+                    break
+                in_comment = False
+            else:
+                prefix, opening, remainder = remainder.partition("<!--")
+                visible.append(prefix)
+                if not opening:
+                    break
+                in_comment = True
+
+        line = "".join(visible)
+        fence = FENCE_RE.match(BLOCKQUOTE_PREFIX_RE.sub("", line.strip()))
+        if fence:
+            fence_marker = fence.group("marker")
+            # A comment opener in a fence's info string is literal code metadata.
+            in_comment = False
+        lines.append(line)
+    return "\n".join(lines)
 
 
 def _clean_item(line: str) -> str:

@@ -61,6 +61,9 @@ Markdown horizontal rules such as `---`, `***`, `___`, and spaced forms like
 `- - -` are ignored.
 HTML comments are ignored, including multi-line template guidance and comments
 appended to otherwise visible items.
+An unclosed comment is ignored through the end of the note. Comment markers
+inside fenced code are literal examples and do not hide surrounding note text;
+likewise, fences inside comments do not start code blocks.
 Fenced Markdown code blocks are ignored, so examples inside them do not create
 items or change sections. A closing fence must use the same marker character,
 be at least as long as its opening fence, and have no trailing text other than

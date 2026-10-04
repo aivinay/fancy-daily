@@ -214,6 +214,20 @@ class CliTests(unittest.TestCase):
                 self.assertEqual(payload["date"], "2026-10-03")
                 self.assertEqual(payload["notes"], ["Shipped work"])
 
+    def test_parse_command_preserves_items_after_commented_code(self) -> None:
+        stdin = io.StringIO(
+            "Date: 2026-10-04\n```html\n<!-- example\n```\n"
+            "Highlights:\n- Visible\n<!-- template -->"
+        )
+        stdout = io.StringIO()
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse", "--strict"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(payload["date"], "2026-10-04")
+        self.assertEqual(payload["highlights"], ["Visible"])
+        self.assertEqual(payload["notes"], [])
+
     def test_parse_command_requires_date_when_requested(self) -> None:
         stderr = io.StringIO()
         stdin = io.StringIO("Highlights:\n- Missing a date")
