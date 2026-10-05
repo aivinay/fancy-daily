@@ -1,5 +1,8 @@
 import io
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -175,6 +178,68 @@ class CliTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 2)
         self.assertEqual(stdout.getvalue(), "")
         self.assertIn("unable to read stdin: input stream unavailable", stderr.getvalue())
+
+    def test_parse_command_rejects_surrogateescaped_stdin(self) -> None:
+        for note_argument in ([], ["-"]):
+            for output_format in ("json", "markdown", "csv", "stats-json"):
+                with self.subTest(note_argument=note_argument, format=output_format):
+                    result = subprocess.run(
+                        [
+                            sys.executable, "-m", "fancy_daily.cli", "parse",
+                            "--format", output_format, *note_argument,
+                        ],
+                        input=b"Notes:\n- Invalid byte: \xff",
+                        capture_output=True,
+                        env={**os.environ, "PYTHONIOENCODING": "utf-8:surrogateescape"},
+                        timeout=10,
+                    )
+
+                    self.assertEqual(result.returncode, 2)
+                    self.assertEqual(result.stdout, b"")
+                    self.assertIn(b"unable to decode stdin", result.stderr)
+                    self.assertNotIn(b"Traceback", result.stderr)
+
+    def test_parse_command_preserves_output_for_surrogateescaped_stdin(self) -> None:
+        for output_format in ("json", "markdown"):
+            with self.subTest(format=output_format), tempfile.TemporaryDirectory() as tmpdir:
+                output = Path(tmpdir) / "summary.txt"
+                output.write_text("previous summary\n", encoding="utf-8")
+                stdout = io.StringIO()
+                stderr = io.StringIO()
+                with (
+                    io.TextIOWrapper(
+                        io.BytesIO(b"Notes:\n- Incomplete character: \xc3"),
+                        encoding="utf-8", errors="surrogateescape",
+                    ) as stdin,
+                    patch("sys.stdin", stdin),
+                    self.assertRaises(SystemExit) as raised,
+                    redirect_stdout(stdout),
+                    redirect_stderr(stderr),
+                ):
+                    main(["parse", "--format", output_format, "-o", str(output)])
+
+                self.assertEqual(raised.exception.code, 2)
+                self.assertEqual(stdout.getvalue(), "")
+                self.assertIn("unable to decode stdin", stderr.getvalue())
+                self.assertEqual(output.read_text(encoding="utf-8"), "previous summary\n")
+
+    def test_parse_command_preserves_valid_unicode_on_stdin(self) -> None:
+        for errors in ("strict", "surrogateescape"):
+            with self.subTest(errors=errors):
+                text = "Notes:\n- Caf\u00e9 rehearsal \U0001d11e"
+                stdout = io.StringIO()
+                with (
+                    io.TextIOWrapper(
+                        io.BytesIO(text.encode("utf-8")),
+                        encoding="utf-8", errors=errors,
+                    ) as stdin,
+                    patch("sys.stdin", stdin),
+                    redirect_stdout(stdout),
+                ):
+                    main(["parse"])
+
+                payload = json.loads(stdout.getvalue())
+                self.assertEqual(payload["notes"], ["Caf\u00e9 rehearsal \U0001d11e"])
 
     def test_parse_command_preserves_utf8_file_contents(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

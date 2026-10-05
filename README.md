@@ -126,6 +126,8 @@ Note files must be UTF-8 encoded. A single leading byte-order mark (BOM) is
 ignored for file, stdin, and library input.
 Missing files, invalid file encoding, and stdin read or decoding failures are
 reported as command-line errors with exit status 2 instead of Python tracebacks.
+Undecodable bytes preserved by stdin's `surrogateescape` mode are rejected before
+parsing or rendering, rather than copied into summaries.
 Failed input reads do not write to the output file.
 Use `--require-date` when a pipeline should reject notes that do not include a
 parseable date.
