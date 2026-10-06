@@ -169,5 +169,9 @@ Run the test suite with:
 PYTHONPATH=src python3 -m unittest discover -s tests
 ```
 
+CI builds and installs the package without editable mode on Python 3.10, 3.11,
+and 3.12. It runs the tests in isolated mode against the installed package and
+checks the installed `fancy-daily` command with the example note.
+
 The project is intentionally growing in small increments so each change stays
 reviewable and useful.
