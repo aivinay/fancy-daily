@@ -56,7 +56,9 @@ the parsed date unset.
 Bullet items using `-`, `*`, `+`, `1.`, or `1)` are normalized before rendering.
 Markdown task list markers like `[ ]`, `[x]`, and `[X]` are also removed from
 parsed items. Empty bullet or checkbox placeholders are ignored.
-This includes bare `-`, `*`, and `+` placeholder lines.
+This includes bare `-`, `*`, and `+` bullets and numbered placeholders such as
+`1.` and `2)`. Placeholders do not count toward entry limits or satisfy
+`--require-entry` or `--strict`.
 Markdown horizontal rules such as `---`, `***`, `___`, and spaced forms like
 `- - -` are ignored.
 HTML comments are ignored, including multi-line template guidance and comments

@@ -345,6 +345,34 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.follow_ups, ("Send update",))
         self.assertEqual(entry.notes, ("Loose note",))
 
+    def test_ignores_empty_ordered_list_placeholders(self) -> None:
+        for section in ("Highlights", "Blockers", "Follow-ups", "Notes"):
+            with self.subTest(section=section):
+                entry = parse_daily_note(
+                    f"Date: 2026-10-07\n{section}:\n"
+                    "1.\n2) \t\n  12.\n> 42)\n1. [ ]\n2) [x]\n"
+                    f"{section}: 3.\n{section}: 4)"
+                )
+
+                self.assertEqual(entry.date, "2026-10-07")
+                self.assertTrue(entry.is_empty)
+                self.assertEqual(entry.total_items, 0)
+
+    def test_keeps_content_among_ordered_list_placeholders(self) -> None:
+        entry = parse_daily_note(
+            "Notes:\n1.\n2. Shipped work\n3)\n4)\tReviewed changes\n"
+            "1.5 hours\n2)No separator\n2026\nVersion 1."
+        )
+
+        self.assertEqual(
+            entry.notes,
+            (
+                "Shipped work", "Reviewed changes", "1.5 hours",
+                "2)No separator", "2026", "Version 1.",
+            ),
+        )
+        self.assertEqual(entry.total_items, 6)
+
     def test_ignores_markdown_horizontal_rules(self) -> None:
         entry = parse_daily_note(
             """

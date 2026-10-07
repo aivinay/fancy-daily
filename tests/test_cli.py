@@ -346,6 +346,24 @@ class CliTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 2)
         self.assertIn("daily note has no parsed entries", stderr.getvalue())
 
+    def test_parse_command_rejects_empty_ordered_lists_when_entry_required(self) -> None:
+        for option in ("--require-entry", "--strict"):
+            with self.subTest(option=option):
+                stdin = io.StringIO("Date: 2026-10-07\nHighlights:\n1.\n2)")
+                stdout = io.StringIO()
+                stderr = io.StringIO()
+                with (
+                    patch("sys.stdin", stdin),
+                    self.assertRaises(SystemExit) as raised,
+                    redirect_stdout(stdout),
+                    redirect_stderr(stderr),
+                ):
+                    main(["parse", option])
+
+                self.assertEqual(raised.exception.code, 2)
+                self.assertEqual(stdout.getvalue(), "")
+                self.assertIn("daily note has no parsed entries", stderr.getvalue())
+
     def test_parse_command_accepts_required_entry(self) -> None:
         stdout = io.StringIO()
         stdin = io.StringIO("Date: 2026-09-10\nNotes:\n- Has content")
