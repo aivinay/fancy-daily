@@ -100,6 +100,8 @@ Use `--format csv` for spreadsheet-friendly rows with `date`, `section`,
 `index`, and `item` columns.
 Use `--format tsv` for the same row layout with tab-separated columns.
 Add `--no-header` with `csv` or `tsv` when appending rows to an existing file.
+Library CSV and TSV renderers quote embedded delimiters, quotes, and line breaks
+in `DailyEntry` fields, preserving their contents. Record endings use LF.
 Use `--format stats-json` or `--format stats` to output only the parsed date,
 empty state, total item count, and per-section counts.
 Use `--format compact-stats-json` or `--format compact-stats` for the same

@@ -1,6 +1,8 @@
+import csv
+import io
 import unittest
 
-from fancy_daily import parse_daily_note, render_csv, render_markdown, render_text, render_tsv
+from fancy_daily import DailyEntry, parse_daily_note, render_csv, render_markdown, render_text, render_tsv
 
 
 class MarkdownRendererTests(unittest.TestCase):
@@ -115,6 +117,40 @@ class MarkdownRendererTests(unittest.TestCase):
             render_csv(entry, include_header=False),
             "2026-09-05,highlights,1,Appended clean row\n",
         )
+
+    def test_delimited_fields_round_trip_with_line_breaks(self) -> None:
+        items = (
+            "First\rSecond",
+            "First\nSecond",
+            "First\r\nSecond",
+            'Comma, tab\t and "quotes"',
+        )
+        entry = DailyEntry(
+            date="2026-10-08", highlights=(), blockers=(), follow_ups=(), notes=items
+        )
+        for render, delimiter in ((render_csv, ","), (render_tsv, "\t")):
+            for include_header in (True, False):
+                with self.subTest(format=render.__name__, header=include_header):
+                    output = render(entry, include_header=include_header)
+                    rows = list(csv.reader(io.StringIO(output, newline=""), delimiter=delimiter))
+                    expected = [
+                        ["2026-10-08", "notes", str(index), item]
+                        for index, item in enumerate(items, start=1)
+                    ]
+                    if include_header:
+                        expected.insert(0, ["date", "section", "index", "item"])
+
+                    self.assertEqual(rows, expected)
+
+    def test_delimited_output_quotes_carriage_returns_with_lf_record_endings(self) -> None:
+        entry = DailyEntry(
+            date=None, highlights=(), blockers=(), follow_ups=(), notes=("First\rSecond",)
+        )
+        for render, delimiter in ((render_csv, ","), (render_tsv, "\t")):
+            with self.subTest(format=render.__name__):
+                expected = delimiter.join(("", "notes", "1", '"First\rSecond"')) + "\n"
+
+                self.assertEqual(render(entry, include_header=False), expected)
 
     def test_renders_tsv_section_rows(self) -> None:
         entry = parse_daily_note(

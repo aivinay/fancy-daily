@@ -18,9 +18,17 @@ def _render_delimited(
     entry: DailyEntry, delimiter: str, *, include_header: bool
 ) -> str:
     output = io.StringIO()
-    writer = csv.writer(output, delimiter=delimiter, lineterminator="\n")
+    writer = csv.writer(output, delimiter=delimiter, lineterminator="\r\n")
+
+    def write_row(row: tuple[object, ...]) -> None:
+        writer.writerow(row)
+        # CRLF enables quoting for both line breaks; shorten only the record ending.
+        output.seek(output.tell() - 2)
+        output.truncate()
+        output.write("\n")
+
     if include_header:
-        writer.writerow(("date", "section", "index", "item"))
+        write_row(("date", "section", "index", "item"))
 
     for section, items in (
         ("highlights", entry.highlights),
@@ -29,7 +37,7 @@ def _render_delimited(
         ("notes", entry.notes),
     ):
         for index, item in enumerate(items, start=1):
-            writer.writerow((entry.date or "", section, index, item))
+            write_row((entry.date or "", section, index, item))
 
     return output.getvalue()
 
