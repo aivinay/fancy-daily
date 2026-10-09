@@ -148,7 +148,13 @@ def main(argv: Sequence[str] | None = None) -> None:
         if args.output and str(args.output) != "-":
             _write_output(args.output, output, parser)
         else:
-            print(output, end="")
+            try:
+                print(output, end="")
+            except UnicodeEncodeError as exc:
+                parser.error(
+                    f"unable to encode stdout using {exc.encoding}: {exc.reason}; "
+                    "use --output for a UTF-8 file"
+                )
 
 
 def _entry_stats(entry: DailyEntry) -> dict[str, object]:

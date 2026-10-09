@@ -934,6 +934,53 @@ class CliTests(unittest.TestCase):
 
         self.assertEqual(stdout.getvalue(), "# 2026-07-12\n\n_No entries recorded._\n")
 
+    def test_parse_command_reports_stdout_encoding_errors(self) -> None:
+        for output_format in ("markdown", "text", "csv", "tsv"):
+            for output_arguments in ([], ["--output", "-"]):
+                with self.subTest(format=output_format, output=output_arguments):
+                    stderr = io.StringIO()
+                    with io.TextIOWrapper(io.BytesIO(), encoding="ascii") as stdout:
+                        with (
+                            patch("sys.stdin", io.StringIO("Notes:\n- Caf\u00e9 review")),
+                            redirect_stdout(stdout),
+                            redirect_stderr(stderr),
+                            self.assertRaises(SystemExit) as raised,
+                        ):
+                            main(["parse", "--format", output_format, *output_arguments])
+
+                        self.assertEqual(raised.exception.code, 2)
+                        self.assertIn("unable to encode stdout using ascii", stderr.getvalue())
+                        stdout.flush()
+                        self.assertEqual(stdout.buffer.getvalue(), b"")
+
+    def test_parse_command_writes_json_to_ascii_stdout(self) -> None:
+        with io.TextIOWrapper(io.BytesIO(), encoding="ascii") as stdout:
+            with (
+                patch("sys.stdin", io.StringIO("Notes:\n- Caf\u00e9 review")),
+                redirect_stdout(stdout),
+            ):
+                main(["parse"])
+
+            stdout.flush()
+            payload = json.loads(stdout.buffer.getvalue())
+
+        self.assertEqual(payload["notes"], ["Caf\u00e9 review"])
+
+    def test_parse_command_writes_utf8_file_with_ascii_stdout(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "summary.md"
+            with io.TextIOWrapper(io.BytesIO(), encoding="ascii") as stdout:
+                with (
+                    patch("sys.stdin", io.StringIO("Notes:\n- Caf\u00e9 review")),
+                    redirect_stdout(stdout),
+                ):
+                    main(["parse", "--format", "markdown", "-o", str(output)])
+
+                stdout.flush()
+                self.assertEqual(stdout.buffer.getvalue(), b"")
+
+            self.assertIn("- Caf\u00e9 review", output.read_text(encoding="utf-8"))
+
     def test_parse_command_writes_output_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
