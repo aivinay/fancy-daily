@@ -589,6 +589,39 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.highlights, ("Parsed front matter cleanly",))
         self.assertEqual(entry.notes, ("Metadata does not become note content",))
 
+    def test_front_matter_prefers_top_level_date_over_nested_dates(self) -> None:
+        for indentation in ("", "    "):
+            with self.subTest(indentation=indentation):
+                lines = (
+                    "---", "project:", "  date: 2020-01-01",
+                    "Date: 2026-10-10", "---", "Notes: Shipped work",
+                )
+                entry = parse_daily_note("\n".join(indentation + line for line in lines))
+
+                self.assertEqual(entry.date, "2026-10-10")
+                self.assertEqual(entry.notes, ("Shipped work",))
+                self.assertEqual(entry.total_items, 1)
+
+    def test_nested_front_matter_dates_do_not_supply_a_note_date(self) -> None:
+        for root_date in ("", "date: invalid\n"):
+            with self.subTest(root_date=root_date):
+                entry = parse_daily_note(
+                    "---\nproject:\n  date: 2020-01-01\n"
+                    f"{root_date}---\nNotes: Shipped work"
+                )
+
+                self.assertIsNone(entry.date)
+                self.assertEqual(entry.notes, ("Shipped work",))
+
+    def test_front_matter_supports_indented_root_metadata(self) -> None:
+        entry = parse_daily_note(
+            "---\n  project:\n    date: 2020-01-01\n"
+            "  date: 2026-10-10\n---\nNotes: Shipped work"
+        )
+
+        self.assertEqual(entry.date, "2026-10-10")
+        self.assertEqual(entry.notes, ("Shipped work",))
+
     def test_keeps_sections_between_horizontal_rules(self) -> None:
         entry = parse_daily_note(
             """

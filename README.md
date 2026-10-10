@@ -72,8 +72,9 @@ be at least as long as its opening fence, and have no trailing text other than
 whitespace. An unclosed code block is ignored through the end of the note.
 Markdown blockquote prefixes are removed before parsing, so quoted dates,
 section labels, and list items work like their unquoted forms.
-YAML front matter at the start of a note is ignored except for its `date` field,
-which is used as the entry date.
+YAML front matter at the start of a note is ignored except for its top-level
+`date` field, which is used as the entry date. Dates inside nested metadata do
+not set the entry date.
 
 ## Usage
 

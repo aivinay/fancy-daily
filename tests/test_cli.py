@@ -321,6 +321,24 @@ class CliTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, 2)
         self.assertIn("daily note is missing a date", stderr.getvalue())
 
+    def test_parse_command_rejects_nested_front_matter_date_when_required(self) -> None:
+        stdin = io.StringIO(
+            "---\nproject:\n  date: 2020-01-01\n---\nNotes: Shipped work"
+        )
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with (
+            patch("sys.stdin", stdin),
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+            self.assertRaises(SystemExit) as raised,
+        ):
+            main(["parse", "--require-date"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertIn("daily note is missing a date", stderr.getvalue())
+
     def test_parse_command_accepts_required_date(self) -> None:
         stdout = io.StringIO()
         stdin = io.StringIO("Date: 2026-09-09\nHighlights:\n- Has a date")
