@@ -108,6 +108,8 @@ def main(argv: Sequence[str] | None = None) -> None:
                 parser.error("--max-items must be zero or greater")
             if args.min_items > args.max_items:
                 parser.error("--min-items cannot exceed --max-items")
+        if args.no_header and args.format not in {"csv", "tsv"}:
+            parser.error("--no-header requires --format csv or tsv")
 
         note_text = _read_note_text(args.note_file, parser)
         payload = parse_daily_note(note_text)

@@ -837,6 +837,44 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["section_counts"]["notes"], 1)
         self.assertEqual(payload["total_items"], 1)
 
+    def test_parse_command_rejects_incompatible_no_header_before_reading_input(self) -> None:
+        for output_format in (
+            None, "json", "compact", "markdown", "md", "text", "plain", "stats-json"
+        ):
+            with self.subTest(format=output_format):
+                arguments = ["parse", "--no-header"]
+                if output_format is not None:
+                    arguments.extend(["--format", output_format])
+                stdin = io.StringIO("Notes: Visible")
+                stdout = io.StringIO()
+                stderr = io.StringIO()
+                with (
+                    patch("sys.stdin", stdin),
+                    patch("sys.stdin.read", wraps=stdin.read) as read,
+                    redirect_stdout(stdout),
+                    redirect_stderr(stderr),
+                    self.assertRaises(SystemExit) as raised,
+                ):
+                    main(arguments)
+
+                self.assertEqual(raised.exception.code, 2)
+                read.assert_not_called()
+                self.assertEqual(stdout.getvalue(), "")
+                self.assertIn("--no-header requires --format csv or tsv", stderr.getvalue())
+
+    def test_parse_command_omits_header_from_csv_and_tsv_stdin(self) -> None:
+        for output_format, delimiter in (("csv", ","), ("tsv", "\t")):
+            with self.subTest(format=output_format):
+                stdin = io.StringIO("Date: 2026-10-11\nNotes: Visible")
+                stdout = io.StringIO()
+                with patch("sys.stdin", stdin), redirect_stdout(stdout):
+                    main(["parse", "--format", output_format, "--no-header"])
+
+                self.assertEqual(
+                    stdout.getvalue(),
+                    delimiter.join(("2026-10-11", "notes", "1", "Visible")) + "\n",
+                )
+
     def test_parse_command_omits_delimited_header(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             note = Path(tmpdir) / "daily.txt"
