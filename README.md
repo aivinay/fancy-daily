@@ -4,6 +4,27 @@ Fancy Daily is a local-first daily note parser and summary helper. It turns a
 plain text daily log into structured JSON or clean Markdown so the same note can
 be used for personal review, weekly summaries, or lightweight status reporting.
 
+## Installation
+
+Requires Python 3.10 or later. On macOS or Linux, run these commands from the
+repository root to install into a virtual environment:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install .
+```
+
+Run the installed CLI without setting `PYTHONPATH` or activating the environment:
+
+```bash
+.venv/bin/fancy-daily --version
+.venv/bin/fancy-daily parse --strict --format markdown examples/daily-note.txt
+```
+
+On Windows, use `.venv\Scripts\python.exe` and `.venv\Scripts\fancy-daily.exe`
+for the environment's executables. Re-run the install command after changing
+source files to update the installed copy.
+
 ## Note Format
 
 Daily notes are plain text with optional sections:
