@@ -351,4 +351,11 @@ def _split_inline_section(line: str) -> tuple[str, str] | None:
     if normalized not in SECTION_ALIASES:
         return None
 
-    return SECTION_ALIASES[normalized], value.strip().lstrip("*_`").strip()
+    label = label.strip()
+    value = value.strip()
+    closing_markers = label[: len(label) - len(label.lstrip("*_`"))][::-1]
+    # Remove only markers closing a label that spans the colon.
+    if closing_markers and not label.endswith(closing_markers):
+        if value.startswith(closing_markers):
+            value = value[len(closing_markers) :].strip()
+    return SECTION_ALIASES[normalized], value

@@ -279,6 +279,14 @@ class CliTests(unittest.TestCase):
                 self.assertEqual(payload["date"], "2026-10-03")
                 self.assertEqual(payload["notes"], ["Shipped work"])
 
+    def test_parse_command_preserves_markers_in_inline_values(self) -> None:
+        stdin = io.StringIO("Notes: _config\n`Notes`: `command`")
+        stdout = io.StringIO()
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            main(["parse"])
+
+        self.assertEqual(json.loads(stdout.getvalue())["notes"], ["_config", "`command`"])
+
     def test_parse_command_preserves_items_after_commented_code(self) -> None:
         stdin = io.StringIO(
             "Date: 2026-10-04\n```html\n<!-- example\n```\n"

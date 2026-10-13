@@ -150,6 +150,21 @@ class DailyParserTests(unittest.TestCase):
             ("Keep labels readable in copied Markdown",),
         )
 
+    def test_preserves_markers_in_inline_values(self) -> None:
+        for label in ("Notes:", "**Notes**:", "_Notes_:", "`Notes`:"):
+            with self.subTest(label=label):
+                values = ("_config", "`command`", "**Important**")
+                entry = parse_daily_note("\n".join(f"{label} {value}" for value in values))
+
+                self.assertEqual(entry.notes, values)
+
+    def test_removes_only_label_markers_spanning_inline_colon(self) -> None:
+        for markers in ("*", "**", "_", "__", "`", "**_"):
+            with self.subTest(markers=markers):
+                entry = parse_daily_note(f"{markers}Notes:{markers[::-1]} `command`")
+
+                self.assertEqual(entry.notes, ("`command`",))
+
     def test_accepts_markdown_date_heading(self) -> None:
         entry = parse_daily_note(
             """
