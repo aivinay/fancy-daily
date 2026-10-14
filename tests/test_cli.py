@@ -390,6 +390,22 @@ class CliTests(unittest.TestCase):
                 self.assertEqual(stdout.getvalue(), "")
                 self.assertIn("daily note has no parsed entries", stderr.getvalue())
 
+    def test_parse_command_rejects_empty_tab_separated_checkboxes(self) -> None:
+        stdin = io.StringIO("Follow-ups:\n-\t[ ]\n*\t[x]\n+\t[X]")
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with (
+            patch("sys.stdin", stdin),
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+            self.assertRaises(SystemExit) as raised,
+        ):
+            main(["parse", "--require-entry"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertIn("daily note has no parsed entries", stderr.getvalue())
+
     def test_parse_command_accepts_required_entry(self) -> None:
         stdout = io.StringIO()
         stdin = io.StringIO("Date: 2026-09-10\nNotes:\n- Has content")

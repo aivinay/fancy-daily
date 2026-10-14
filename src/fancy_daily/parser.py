@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import date as calendar_date, datetime
 
 
-ORDERED_ITEM_RE = re.compile(r"^\d+[.)](?:\s+|$)")
+LIST_ITEM_RE = re.compile(r"^(?:[-*+]|\d+[.)])(?:\s+|$)")
 CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s*")
 DATE_LINE_RE = re.compile(
     r"^(?:#+\s+)?(?P<date>\d{4}-\d{2}-\d{2})(?P<suffix>(?:T|\s+).*)?$"
@@ -220,15 +220,7 @@ def _without_html_comments(text: str) -> str:
 
 
 def _clean_item(line: str) -> str:
-    if line in {"-", "*", "+"}:
-        return ""
-
-    for prefix in ("- ", "* ", "+ "):
-        if line.startswith(prefix):
-            line = line[len(prefix) :].strip()
-            break
-    else:
-        line = ORDERED_ITEM_RE.sub("", line, count=1).strip()
+    line = LIST_ITEM_RE.sub("", line, count=1).strip()
     return CHECKBOX_ITEM_RE.sub("", line, count=1).strip()
 
 

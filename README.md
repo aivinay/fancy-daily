@@ -77,6 +77,7 @@ ISO 8601 timestamps such as `2026-07-02T09:30:00Z` are normalized to their
 calendar date. Date and timestamp values must be valid; invalid values leave
 the parsed date unset.
 Bullet items using `-`, `*`, `+`, `1.`, or `1)` are normalized before rendering.
+Spaces or tabs may separate a list marker from its text.
 Markdown task list markers like `[ ]`, `[x]`, and `[X]` are also removed from
 parsed items. Empty bullet or checkbox placeholders are ignored.
 This includes bare `-`, `*`, and `+` bullets and numbered placeholders such as

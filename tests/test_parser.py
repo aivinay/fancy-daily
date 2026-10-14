@@ -116,6 +116,22 @@ class DailyParserTests(unittest.TestCase):
             ("Captured a Markdown plus bullet", "Kept the item text clean"),
         )
 
+    def test_cleans_tab_separated_unordered_items(self) -> None:
+        for marker in ("-", "*", "+"):
+            with self.subTest(marker=marker):
+                entry = parse_daily_note(
+                    f"Notes:\n{marker}\tPlain item\n{marker} \t[x] Checked item\n"
+                    f"Notes: {marker}\t[ ] Inline item"
+                )
+
+                self.assertEqual(entry.notes, ("Plain item", "Checked item", "Inline item"))
+
+    def test_keeps_marker_like_text_without_whitespace(self) -> None:
+        values = ("-config", "+1", "*Important*", "**Important**")
+        entry = parse_daily_note("Notes:\n" + "\n".join(values))
+
+        self.assertEqual(entry.notes, values)
+
     def test_accepts_markdown_heading_sections(self) -> None:
         entry = parse_daily_note(
             """
