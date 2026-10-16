@@ -21,6 +21,12 @@ Run the installed CLI without setting `PYTHONPATH` or activating the environment
 .venv/bin/fancy-daily parse --strict --format markdown examples/daily-note.txt
 ```
 
+Alternatively, invoke the same CLI through the environment's Python:
+
+```bash
+.venv/bin/python -m fancy_daily parse --strict examples/daily-note.txt
+```
+
 On Windows, use `.venv\Scripts\python.exe` and `.venv\Scripts\fancy-daily.exe`
 for the environment's executables. Re-run the install command after changing
 source files to update the installed copy.
