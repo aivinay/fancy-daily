@@ -1107,6 +1107,40 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["date"], "2026-07-27")
         self.assertEqual(payload["highlights"], ["Used short output option"])
 
+    def test_parse_command_writes_explicit_relative_dash_file(self) -> None:
+        for option in ("--output", "-o"):
+            with self.subTest(option=option), tempfile.TemporaryDirectory() as tmpdir:
+                original_directory = Path.cwd()
+                stdout = io.StringIO()
+                try:
+                    os.chdir(tmpdir)
+                    with (
+                        patch("sys.stdin", io.StringIO("Notes: Saved to a dash file")),
+                        redirect_stdout(stdout),
+                    ):
+                        main(["parse", option, "./-"])
+
+                    self.assertEqual(stdout.getvalue(), "")
+                    payload = json.loads(Path("-").read_text(encoding="utf-8"))
+                    self.assertEqual(payload["notes"], ["Saved to a dash file"])
+                finally:
+                    os.chdir(original_directory)
+
+    def test_parse_command_rejects_empty_output_path(self) -> None:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with (
+            patch("sys.stdin", io.StringIO("Notes: Has content")),
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+            self.assertRaises(SystemExit) as raised,
+        ):
+            main(["parse", "--output", ""])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertIn("unable to write output file", stderr.getvalue())
+
     def test_parse_command_treats_dash_output_as_stdout(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

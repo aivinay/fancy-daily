@@ -190,6 +190,7 @@ PYTHONPATH=src python3 -m fancy_daily.cli parse \
 
 Missing parent directories for `--output` are created automatically.
 Use `--output -` to write to stdout explicitly.
+Only the literal `-` selects stdout; use `--output ./-` to write a file named `-`.
 If stdout's encoding cannot represent the summary, the CLI reports an error
 with exit status 2. Use `--output` with a file path to write UTF-8 output.
 Output write failures are reported as command-line errors instead of Python

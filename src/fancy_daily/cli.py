@@ -57,7 +57,6 @@ def main(argv: Sequence[str] | None = None) -> None:
     parse.add_argument(
         "-o",
         "--output",
-        type=Path,
         help="Write output to a file instead of stdout.",
     )
     parse.add_argument(
@@ -147,8 +146,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         else:
             output = json.dumps(asdict(payload), indent=2, sort_keys=True) + "\n"
 
-        if args.output and str(args.output) != "-":
-            _write_output(args.output, output, parser)
+        if args.output is not None and args.output != "-":
+            _write_output(Path(args.output), output, parser)
         else:
             try:
                 print(output, end="")
