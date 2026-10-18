@@ -6,7 +6,7 @@ from datetime import date as calendar_date, datetime
 
 
 LIST_ITEM_RE = re.compile(r"^(?:[-*+]|\d+[.)])(?:\s+|$)")
-CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\]\s*")
+CHECKBOX_ITEM_RE = re.compile(r"^\[[ xX]\](?:\s+|$)")
 DATE_LINE_RE = re.compile(
     r"^(?:#+\s+)?(?P<date>\d{4}-\d{2}-\d{2})(?P<suffix>(?:T|\s+).*)?$"
 )

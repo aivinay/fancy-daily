@@ -356,6 +356,20 @@ class DailyParserTests(unittest.TestCase):
             ("Write release notes", "Ship parser support", "Review summary output"),
         )
 
+    def test_preserves_checkbox_like_text_without_separator(self) -> None:
+        values = ("[x]coordinate", "[X]value", "[ ]placeholder")
+        for prefix in ("", "- ", "1. "):
+            with self.subTest(prefix=prefix):
+                entry = parse_daily_note(
+                    "Notes:\n" + "\n".join(prefix + value for value in values)
+                )
+                self.assertEqual(entry.notes, values)
+
+    def test_cleans_tab_separated_checkboxes(self) -> None:
+        entry = parse_daily_note("Notes:\n[x]\tDone\n- [ ]\tPending\n[X]")
+
+        self.assertEqual(entry.notes, ("Done", "Pending"))
+
     def test_ignores_empty_list_placeholders(self) -> None:
         entry = parse_daily_note(
             """
