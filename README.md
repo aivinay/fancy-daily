@@ -71,6 +71,7 @@ Section labels may be written on their own line or inline with a value, such as
 `Highlights: Finished the parser update`. Unlabeled lines are treated as notes.
 Markdown emphasis around section labels is ignored, so labels such as
 `**Highlights:**`, `_Follow-ups:_`, and `` `Notes`: `` are recognized.
+Section headings may include closing hashes, such as `## Highlights ##`.
 Markers belonging to an inline value, such as `_config`, `` `command` ``, or
 `**Important**`, are preserved.
 Dates may be written as `Date: 2026-07-02`, as a plain `2026-07-02` line, or as

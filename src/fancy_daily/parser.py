@@ -156,15 +156,15 @@ def parse_daily_note(text: str) -> DailyEntry:
                 date = parsed_date
                 continue
 
+        normalized = _normalize_section_name(line)
+        if normalized in SECTION_ALIASES:
+            current_section = SECTION_ALIASES[normalized]
+            continue
+
         inline_section = _split_inline_section(line)
         if inline_section is not None:
             current_section, value = inline_section
             _append_clean_item(sections, current_section, value)
-            continue
-
-        normalized = _normalize_section_name(line)
-        if normalized in SECTION_ALIASES:
-            current_section = SECTION_ALIASES[normalized]
             continue
 
         _append_clean_item(sections, current_section, line)
@@ -271,6 +271,8 @@ def _append_clean_item(
 
 
 def _normalize_section_name(line: str) -> str:
+    if line.startswith("#"):
+        line = re.sub(r"\s+#+$", "", line)
     return _normalize_label(line.lstrip("#"))
 
 

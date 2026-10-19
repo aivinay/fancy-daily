@@ -146,6 +146,24 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.highlights, ("Parsed markdown headings",))
         self.assertEqual(entry.follow_ups, ("Document heading support",))
 
+    def test_accepts_closed_markdown_section_headings(self) -> None:
+        entry = parse_daily_note(
+            "## Highlights ##\n- Shipped work\n"
+            "> ### **Blockers:** ###\n- Waiting on review\n"
+            "## Follow-ups\t####\n- Send update\n## Notes ##\n- Keep context"
+        )
+
+        self.assertEqual(entry.highlights, ("Shipped work",))
+        self.assertEqual(entry.blockers, ("Waiting on review",))
+        self.assertEqual(entry.follow_ups, ("Send update",))
+        self.assertEqual(entry.notes, ("Keep context",))
+
+    def test_preserves_hashes_outside_closing_heading_markers(self) -> None:
+        values = ("Highlights ##", "## Highlights##", "Notes: Keep #tag ##")
+        entry = parse_daily_note("Notes:\n" + "\n".join(values))
+
+        self.assertEqual(entry.notes, (values[0], values[1], "Keep #tag ##"))
+
     def test_accepts_emphasized_markdown_section_labels(self) -> None:
         entry = parse_daily_note(
             """
