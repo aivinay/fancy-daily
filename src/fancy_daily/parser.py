@@ -281,7 +281,7 @@ def _normalize_label(label: str) -> str:
 
 
 def _is_markdown_rule(line: str) -> bool:
-    rule_chars = line.replace(" ", "")
+    rule_chars = line.replace(" ", "").replace("\t", "")
     return (
         len(rule_chars) >= 3
         and len(set(rule_chars)) == 1

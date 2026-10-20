@@ -436,6 +436,21 @@ class DailyParserTests(unittest.TestCase):
         )
         self.assertEqual(entry.total_items, 6)
 
+    def test_ignores_tab_separated_horizontal_rules(self) -> None:
+        for marker in ("-", "*", "_"):
+            for separator in ("\t", " \t "):
+                with self.subTest(marker=marker, separator=separator):
+                    rule = separator.join([marker] * 3)
+                    entry = parse_daily_note(f"Notes:\n{rule}\n> {rule}")
+
+                    self.assertTrue(entry.is_empty)
+                    self.assertEqual(entry.total_items, 0)
+
+    def test_keeps_item_text_next_to_tab_separated_rules(self) -> None:
+        entry = parse_daily_note("Highlights:\n-\tShipped work\n*\t*\t*\nMore work")
+
+        self.assertEqual(entry.highlights, ("Shipped work", "More work"))
+
     def test_ignores_markdown_horizontal_rules(self) -> None:
         entry = parse_daily_note(
             """

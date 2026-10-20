@@ -91,7 +91,7 @@ This includes bare `-`, `*`, and `+` bullets and numbered placeholders such as
 `1.` and `2)`. Placeholders do not count toward entry limits or satisfy
 `--require-entry` or `--strict`.
 Markdown horizontal rules such as `---`, `***`, `___`, and spaced forms like
-`- - -` are ignored.
+`- - -` are ignored. Spaces and tabs may separate the rule's markers.
 HTML comments are ignored, including multi-line template guidance and comments
 appended to otherwise visible items.
 An unclosed comment is ignored through the end of the note. Comment markers
