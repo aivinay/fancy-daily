@@ -1214,6 +1214,39 @@ class CliTests(unittest.TestCase):
         self.assertIn("# 2026-06-30", rendered)
         self.assertIn("- Created nested output directories", rendered)
 
+    def test_parse_command_reports_invalid_input_path(self) -> None:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with (
+            self.assertRaises(SystemExit) as raised,
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+        ):
+            main(["parse", "invalid\0note.txt"])
+
+        self.assertEqual(raised.exception.code, 2)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertIn("unable to read note file:", stderr.getvalue())
+
+    def test_parse_command_reports_invalid_output_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "summary.json"
+            output.write_text("previous summary\n", encoding="utf-8")
+            stdout = io.StringIO()
+            stderr = io.StringIO()
+            with (
+                patch("sys.stdin", io.StringIO("Notes: Useful work")),
+                self.assertRaises(SystemExit) as raised,
+                redirect_stdout(stdout),
+                redirect_stderr(stderr),
+            ):
+                main(["parse", "--output", str(output) + "\0invalid"])
+
+            self.assertEqual(output.read_text(encoding="utf-8"), "previous summary\n")
+        self.assertEqual(raised.exception.code, 2)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertIn("unable to write output file:", stderr.getvalue())
+
     def test_parse_command_reports_output_write_errors(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

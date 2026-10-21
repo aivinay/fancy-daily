@@ -180,7 +180,7 @@ def _read_note_text(note_file: str, parser: argparse.ArgumentParser) -> str:
         parser.error(f"unable to decode {source} using {exc.encoding}: {exc.reason}")
     except UnicodeEncodeError:
         parser.error("unable to decode stdin: input contains invalid Unicode characters")
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         source = "stdin" if note_file == "-" else "note file"
         parser.error(f"unable to read {source}: {exc}")
 
@@ -191,7 +191,7 @@ def _write_output(
     try:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(output, encoding="utf-8")
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         parser.error(f"unable to write output file: {exc}")
 
 
