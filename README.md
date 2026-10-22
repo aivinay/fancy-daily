@@ -197,6 +197,19 @@ with exit status 2. Use `--output` with a file path to write UTF-8 output.
 Output write failures are reported as command-line errors instead of Python
 tracebacks.
 
+For automated reports, validate before replacing the previous summary:
+
+```bash
+fancy-daily parse --strict --require-section highlights \
+  --format compact-json --output reports/daily.json daily.txt
+```
+
+A successful parse exits with status 0. Validation failures exit with status 2,
+write diagnostics to stderr, and leave an existing `--output` file unchanged.
+Prefer `--output` over `> reports/daily.json` here: the shell truncates a redirected
+file before the CLI can validate the note. File writes themselves are not atomic;
+an interrupted or failed write can still leave a partial report.
+
 When a note has a date but no section entries, Markdown output keeps the date
 heading and renders `_No entries recorded._` so empty daily logs are explicit.
 Library callers can use `DailyEntry.is_empty`, `DailyEntry.total_items`, and

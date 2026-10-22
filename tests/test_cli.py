@@ -1247,6 +1247,35 @@ class CliTests(unittest.TestCase):
         self.assertEqual(stdout.getvalue(), "")
         self.assertIn("unable to write output file:", stderr.getvalue())
 
+    def test_validation_failures_preserve_existing_report(self) -> None:
+        cases = (
+            (["--strict"], "Notes: Missing date"),
+            (["--strict"], "Date: 2026-10-22"),
+            (["--require-section", "highlights"], "Notes: No highlights"),
+            (["--min-items", "2"], "Notes: Only one item"),
+            (["--max-items", "0"], "Notes: Too many items"),
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "summary.json"
+            output.write_text("previous summary\n", encoding="utf-8")
+            for options, note in cases:
+                with self.subTest(options=options, note=note):
+                    stdout = io.StringIO()
+                    stderr = io.StringIO()
+                    with (
+                        patch("sys.stdin", io.StringIO(note)),
+                        redirect_stdout(stdout),
+                        redirect_stderr(stderr),
+                        self.assertRaises(SystemExit) as raised,
+                    ):
+                        main(["parse", *options, "--output", str(output)])
+                    self.assertEqual(raised.exception.code, 2)
+                    self.assertEqual(stdout.getvalue(), "")
+                    self.assertIn("error:", stderr.getvalue())
+                    self.assertEqual(
+                        output.read_text(encoding="utf-8"), "previous summary\n"
+                    )
+
     def test_parse_command_reports_output_write_errors(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
