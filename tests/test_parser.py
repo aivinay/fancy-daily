@@ -691,6 +691,27 @@ class DailyParserTests(unittest.TestCase):
                 self.assertIsNone(entry.date)
                 self.assertEqual(entry.notes, ("Shipped work",))
 
+    def test_front_matter_accepts_whitespace_before_date_colon(self) -> None:
+        for indentation in ("", "  "):
+            for separator in (" ", "\t"):
+                with self.subTest(indentation=indentation, separator=separator):
+                    entry = parse_daily_note(
+                        f"---\n{indentation}project:\n"
+                        f"{indentation}  date{separator}: 2020-01-01\n"
+                        f'{indentation}Date{separator}: "2026-10-23"\n'
+                        "---\nNotes: Shipped work"
+                    )
+                    self.assertEqual(entry.date, "2026-10-23")
+                    self.assertEqual(entry.notes, ("Shipped work",))
+
+    def test_nested_spaced_date_field_does_not_supply_note_date(self) -> None:
+        entry = parse_daily_note(
+            "---\nproject:\n  date : 2020-01-01\n---\nNotes: Shipped work"
+        )
+
+        self.assertIsNone(entry.date)
+        self.assertEqual(entry.notes, ("Shipped work",))
+
     def test_front_matter_supports_indented_root_metadata(self) -> None:
         entry = parse_daily_note(
             "---\n  project:\n    date: 2020-01-01\n"

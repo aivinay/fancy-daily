@@ -323,9 +323,9 @@ def _without_yaml_front_matter(text: str) -> str:
     indentation = first_body_line[: len(first_body_line) - len(first_body_line.lstrip())]
     date_line = next(
         (
-            line.strip()
+            "Date:" + line.partition(":")[2]
             for line in lines[first_content + 1 : closing]
-            if line.lower().startswith(indentation + "date:")
+            if re.match(re.escape(indentation) + r"date[ \t]*:", line, re.IGNORECASE)
         ),
         None,
     )
