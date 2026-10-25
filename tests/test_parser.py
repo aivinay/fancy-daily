@@ -712,6 +712,28 @@ class DailyParserTests(unittest.TestCase):
         self.assertIsNone(entry.date)
         self.assertEqual(entry.notes, ("Shipped work",))
 
+    def test_front_matter_allows_comments_before_first_field(self) -> None:
+        for indentation in ("", "  "):
+            with self.subTest(indentation=indentation):
+                entry = parse_daily_note(
+                    "---\n# Daily template\n\n  # Metadata below\n"
+                    f"{indentation}title: Daily review\n"
+                    f"{indentation}date: 2026-10-25\n"
+                    "---\nHighlights: Shipped work"
+                )
+
+                self.assertEqual(entry.date, "2026-10-25")
+                self.assertEqual(entry.highlights, ("Shipped work",))
+                self.assertEqual(entry.notes, ())
+
+    def test_comments_do_not_hide_sections_between_rules(self) -> None:
+        entry = parse_daily_note(
+            "---\n# Context\nHighlights: Shipped work\n---\nNotes: Kept context"
+        )
+
+        self.assertEqual(entry.highlights, ("Shipped work",))
+        self.assertEqual(entry.notes, ("# Context", "Kept context"))
+
     def test_front_matter_supports_indented_root_metadata(self) -> None:
         entry = parse_daily_note(
             "---\n  project:\n    date: 2020-01-01\n"

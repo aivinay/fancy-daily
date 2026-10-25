@@ -310,7 +310,11 @@ def _without_yaml_front_matter(text: str) -> str:
         return text
 
     first_body_line = next(
-        (line for line in lines[first_content + 1 : closing] if line.strip()),
+        (
+            line
+            for line in lines[first_content + 1 : closing]
+            if line.strip() and not line.lstrip().startswith("#")
+        ),
         "",
     )
     if (
