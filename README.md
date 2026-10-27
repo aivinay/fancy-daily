@@ -215,6 +215,30 @@ heading and renders `_No entries recorded._` so empty daily logs are explicit.
 Library callers can use `DailyEntry.is_empty`, `DailyEntry.total_items`, and
 `DailyEntry.section_counts` for quick summary checks after parsing.
 
+## Python Library
+
+After installation, import the public API directly:
+
+```python
+from fancy_daily import parse_daily_note, render_markdown
+
+entry = parse_daily_note("Date: 2026-10-27\nHighlights: Shipped the update")
+assert entry.date == "2026-10-27"
+assert entry.highlights == ("Shipped the update",)
+assert entry.total_items == 1
+print(render_markdown(entry), end="")
+```
+
+`parse_daily_note` accepts text, not a file path. For a file, pass
+`Path("daily.txt").read_text(encoding="utf-8")` from `pathlib` instead.
+It returns a frozen `DailyEntry` with tuple-valued sections; an absent or invalid
+date is `None`. Parsing does not enforce CLI options such as `--strict` or
+`--require-section`: library callers must check the returned fields themselves.
+
+`render_text`, `render_csv`, and `render_tsv` are also public exports. Renderers
+return strings without writing to files or stdout. For JSON, serialize
+`dataclasses.asdict(entry)` with `json.dumps`.
+
 ## Development
 
 Run the test suite with:
