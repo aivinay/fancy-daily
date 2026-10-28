@@ -5,6 +5,25 @@ from fancy_daily import parse_daily_note
 
 
 class ExampleNoteTests(unittest.TestCase):
+    def test_markdown_example_excludes_template_guidance(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        entry = parse_daily_note(
+            (root / "examples" / "daily-note.md").read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(entry.date, "2026-10-28")
+        self.assertEqual(
+            entry.highlights,
+            ("Shipped the release checklist", "Verified the installed CLI"),
+        )
+        self.assertEqual(entry.blockers, ())
+        self.assertEqual(
+            entry.follow_ups,
+            ("Share the release summary", "Confirm tomorrow's review owner"),
+        )
+        self.assertEqual(entry.notes, ("Keep the rollout small and observable.",))
+        self.assertEqual(entry.total_items, 5)
+
     def test_daily_note_example_parses_supported_patterns(self) -> None:
         root = Path(__file__).resolve().parents[1]
         example = root / "examples" / "daily-note.txt"

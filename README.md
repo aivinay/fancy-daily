@@ -153,6 +153,16 @@ Try the included example note:
 PYTHONPATH=src python3 -m fancy_daily.cli parse --format markdown examples/daily-note.txt
 ```
 
+For a Markdown template with front matter, task lists, comments, and fenced
+examples, try:
+
+```bash
+fancy-daily parse --strict --format markdown examples/daily-note.md
+```
+
+Its summary contains two highlights, two follow-ups, and one note. The empty
+blocker checkbox, template comments, metadata, and fenced example are excluded.
+
 Pipe a note through standard input by using `-` as the file path:
 
 ```bash
