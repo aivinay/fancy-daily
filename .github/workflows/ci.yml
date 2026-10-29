@@ -27,3 +27,5 @@ jobs:
         run: |
           fancy-daily --version
           fancy-daily parse --strict examples/daily-note.txt
+          fancy-daily parse --strict --require-section highlights --format markdown examples/daily-note.md
+          python -I -m fancy_daily parse --strict --format compact-json examples/daily-note.md
