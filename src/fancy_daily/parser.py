@@ -144,7 +144,7 @@ def parse_daily_note(text: str) -> DailyEntry:
         if _is_markdown_rule(line):
             continue
 
-        if line.lower().startswith("date:"):
+        if re.match(r"date[ \t]*:", line, re.IGNORECASE):
             value = line.split(":", 1)[1].strip()
             date = _parse_date_value(value)
             continue

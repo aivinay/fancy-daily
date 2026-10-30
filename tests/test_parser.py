@@ -264,6 +264,18 @@ class DailyParserTests(unittest.TestCase):
         self.assertEqual(entry.date, "2026-07-31")
         self.assertEqual(entry.highlights, ("Parsed titled date label",))
 
+    def test_accepts_whitespace_before_date_label_colon(self) -> None:
+        for label in ("Date :", "DATE\t:", "> Date \t:"):
+            with self.subTest(label=label):
+                entry = parse_daily_note(f"{label} '2026-10-30'\nNotes: Kept work")
+                self.assertEqual(entry.date, "2026-10-30")
+                self.assertEqual(entry.notes, ("Kept work",))
+
+    def test_preserves_non_date_labels(self) -> None:
+        entry = parse_daily_note("Notes:\nDate range: Tomorrow\nDatabase: Ready")
+        self.assertIsNone(entry.date)
+        self.assertEqual(entry.notes, ("Date range: Tomorrow", "Database: Ready"))
+
     def test_accepts_quoted_date_values(self) -> None:
         yaml_entry = parse_daily_note(
             """
