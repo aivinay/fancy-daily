@@ -225,6 +225,27 @@ heading and renders `_No entries recorded._` so empty daily logs are explicit.
 Library callers can use `DailyEntry.is_empty`, `DailyEntry.total_items`, and
 `DailyEntry.section_counts` for quick summary checks after parsing.
 
+## Parsing Model
+
+Each nonempty content line becomes one item in the current section. Wrapped
+paragraphs are not joined, and indentation does not preserve nested-list
+relationships. This is a lightweight note parser, not a full Markdown or YAML
+document processor.
+
+Checked and unchecked tasks are both included. Checkbox state and list numbering
+are discarded; they do not filter completed work or supply separate status fields.
+For example:
+
+```text
+Follow-ups:
+- [x] Send summary
+- [ ] Confirm owner
+```
+
+This produces `follow_ups` containing `Send summary` and `Confirm owner`, in that
+order. Use separate sections or keep status in the item text when it must survive
+parsing. An empty checkbox is a placeholder and contributes no item.
+
 ## Python Library
 
 After installation, import the public API directly:
