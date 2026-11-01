@@ -784,6 +784,17 @@ class DailyParserTests(unittest.TestCase):
             ("A thought without a section", "Another note", "Last note"),
         )
 
+    def test_accepts_variable_whitespace_in_section_labels(self) -> None:
+        for label in ("Follow  ups", "Action\titems", "Next   steps", "To\tdo"):
+            with self.subTest(label=label):
+                entry = parse_daily_note(
+                    f"## {label}\n- First item\n**{label}:** Keep  inner\tspacing"
+                )
+                self.assertEqual(
+                    entry.follow_ups, ("First item", "Keep  inner\tspacing")
+                )
+                self.assertEqual(entry.notes, ())
+
     def test_accepts_inline_section_values(self) -> None:
         entry = parse_daily_note(
             """

@@ -277,7 +277,8 @@ def _normalize_section_name(line: str) -> str:
 
 
 def _normalize_label(label: str) -> str:
-    return label.strip().strip("*_`").rstrip(":").strip().strip("*_`").lower()
+    normalized = label.strip().strip("*_`").rstrip(":").strip().strip("*_`").lower()
+    return " ".join(normalized.split())
 
 
 def _is_markdown_rule(line: str) -> bool:
