@@ -6,6 +6,18 @@ from fancy_daily import DailyEntry, parse_daily_note, render_csv, render_markdow
 
 
 class MarkdownRendererTests(unittest.TestCase):
+    def test_indents_multiline_item_continuations(self) -> None:
+        entry = DailyEntry(
+            date=None, highlights=(), blockers=(), follow_ups=(),
+            notes=("First line\nSecond line\n\nFinal line", "Next item"),
+        )
+        for renderer in (render_markdown, render_text):
+            with self.subTest(renderer=renderer.__name__):
+                self.assertIn(
+                    "- First line\n  Second line\n  \n  Final line\n- Next item\n",
+                    renderer(entry),
+                )
+
     def test_renders_populated_sections(self) -> None:
         entry = parse_daily_note(
             """

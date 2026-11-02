@@ -87,7 +87,7 @@ def _append_section(lines: list[str], title: str, items: tuple[str, ...]) -> Non
 
     lines.append(f"## {title}")
     for item in items:
-        lines.append(f"- {item}")
+        lines.append("- " + item.replace("\n", "\n  "))
     lines.append("")
 
 
@@ -97,5 +97,5 @@ def _append_text_section(lines: list[str], title: str, items: tuple[str, ...]) -
 
     lines.append(f"{title}:")
     for item in items:
-        lines.append(f"- {item}")
+        lines.append("- " + item.replace("\n", "\n  "))
     lines.append("")
