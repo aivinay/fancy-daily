@@ -81,13 +81,18 @@ def render_text(entry: DailyEntry) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def _render_item(item: str) -> str:
+    normalized = item.replace("\r\n", "\n").replace("\r", "\n")
+    return "- " + normalized.replace("\n", "\n  ")
+
+
 def _append_section(lines: list[str], title: str, items: tuple[str, ...]) -> None:
     if not items:
         return
 
     lines.append(f"## {title}")
     for item in items:
-        lines.append("- " + item.replace("\n", "\n  "))
+        lines.append(_render_item(item))
     lines.append("")
 
 
@@ -97,5 +102,5 @@ def _append_text_section(lines: list[str], title: str, items: tuple[str, ...]) -
 
     lines.append(f"{title}:")
     for item in items:
-        lines.append("- " + item.replace("\n", "\n  "))
+        lines.append(_render_item(item))
     lines.append("")
