@@ -7,10 +7,20 @@ from .parser import DailyEntry
 
 
 def render_csv(entry: DailyEntry, *, include_header: bool = True) -> str:
+    """Return CSV rows with date, section, per-section index, and item columns.
+
+    Records end with LF; embedded line breaks and delimiters are quoted.
+    An empty entry returns only the header, or an empty string without it.
+    """
     return _render_delimited(entry, delimiter=",", include_header=include_header)
 
 
 def render_tsv(entry: DailyEntry, *, include_header: bool = True) -> str:
+    """Return tab-delimited rows using the same columns and quoting as CSV.
+
+    Set include_header=False to omit the header row. Item text is preserved,
+    including embedded CR and LF characters within quoted fields.
+    """
     return _render_delimited(entry, delimiter="\t", include_header=include_header)
 
 
@@ -43,6 +53,12 @@ def _render_delimited(
 
 
 def render_markdown(entry: DailyEntry) -> str:
+    """Return a Markdown summary ending with LF, omitting empty sections.
+
+    Empty entries retain a title and an explicit empty-state message. Item
+    CRLF/CR breaks become LF, with continuation lines indented under the bullet.
+    Item Markdown is retained rather than escaped.
+    """
     lines: list[str] = []
     title = entry.date or "Daily Summary"
     lines.append(f"# {title}")
@@ -62,6 +78,11 @@ def render_markdown(entry: DailyEntry) -> str:
 
 
 def render_text(entry: DailyEntry) -> str:
+    """Return a plain-text summary with a title underline and trailing LF.
+
+    Empty sections are omitted; empty entries get an explicit message. Item
+    CRLF/CR breaks become LF and continuation lines are indented by two spaces.
+    """
     lines: list[str] = []
     title = entry.date or "Daily Summary"
     lines.append(title)
