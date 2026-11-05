@@ -1276,6 +1276,23 @@ class CliTests(unittest.TestCase):
                         output.read_text(encoding="utf-8"), "previous summary\n"
                     )
 
+    def test_parse_help_describes_output_without_reading_stdin(self) -> None:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with (
+            patch("sys.stdin.read", side_effect=AssertionError("must not read input")),
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+            self.assertRaises(SystemExit) as raised,
+        ):
+            main(["parse", "--help"])
+
+        self.assertEqual(raised.exception.code, 0)
+        self.assertEqual(stderr.getvalue(), "")
+        help_text = " ".join(stdout.getvalue().split())
+        self.assertIn("Write UTF-8 output to a file", help_text)
+        self.assertIn("'-' selects stdout (the default)", help_text)
+
     def test_parse_command_reports_output_write_errors(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

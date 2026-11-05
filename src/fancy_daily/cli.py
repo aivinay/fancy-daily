@@ -57,7 +57,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     parse.add_argument(
         "-o",
         "--output",
-        help="Write output to a file instead of stdout.",
+        help="Write UTF-8 output to a file; '-' selects stdout (the default).",
     )
     parse.add_argument(
         "--no-header",
