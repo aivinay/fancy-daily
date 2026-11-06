@@ -117,6 +117,20 @@ class DailyEntry:
 
 
 def parse_daily_note(text: str) -> DailyEntry:
+    """Parse note text into a frozen entry with ordered, tuple-valued sections.
+
+    Pass decoded text, not a file path. Unlabeled content goes into notes;
+    missing sections are empty tuples and a missing/invalid date is None.
+    This function does not enforce CLI validation options such as --strict.
+
+    >>> entry = parse_daily_note("Highlights: Shipped work")
+    >>> entry.highlights
+    ('Shipped work',)
+    >>> entry.date is None
+    True
+    >>> entry.total_items
+    1
+    """
     text = text.removeprefix("\ufeff")
     date: str | None = None
     sections: dict[str, list[str]] = {
