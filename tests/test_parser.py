@@ -1,6 +1,13 @@
+import doctest
 import unittest
 
 from fancy_daily import parse_daily_note
+from fancy_daily import parser
+
+
+def load_tests(loader, tests, pattern):
+    tests.addTests(doctest.DocTestSuite(parser))
+    return tests
 
 
 class DailyParserTests(unittest.TestCase):
