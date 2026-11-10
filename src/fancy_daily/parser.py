@@ -12,7 +12,7 @@ DATE_LINE_RE = re.compile(
 )
 BLOCKQUOTE_PREFIX_RE = re.compile(r"^(?:>\s*)+")
 YAML_FIELD_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*\s*:")
-FENCE_RE = re.compile(r"^(?P<marker>`{3,}|~{3,})(?:[^`~].*)?$")
+FENCE_RE = re.compile(r"^(?P<marker>`{3,}(?=[^`]*$)|~{3,})(?:[^`~].*)?$")
 
 SECTION_ALIASES = {
     "accomplishment": "highlights",

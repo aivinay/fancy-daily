@@ -11,6 +11,12 @@ def load_tests(loader, tests, pattern):
 
 
 class DailyParserTests(unittest.TestCase):
+    def test_invalid_backtick_fence_does_not_hide_later_entries(self) -> None:
+        entry = parse_daily_note("```lang`invalid\nHighlights: Kept work")
+
+        self.assertEqual(entry.notes, ("```lang`invalid",))
+        self.assertEqual(entry.highlights, ("Kept work",))
+
     def test_parses_daily_note_sections(self) -> None:
         entry = parse_daily_note(
             """
