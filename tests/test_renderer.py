@@ -134,6 +134,17 @@ class MarkdownRendererTests(unittest.TestCase):
             "2026-09-05,highlights,1,Appended clean row\n",
         )
 
+    def test_empty_delimited_exports_contain_no_item_rows(self) -> None:
+        for source in ("", "Date: 2026-11-12"):
+            entry = parse_daily_note(source)
+            for render, delimiter in ((render_csv, ","), (render_tsv, "\t")):
+                with self.subTest(source=source, format=render.__name__):
+                    self.assertEqual(
+                        render(entry),
+                        delimiter.join(("date", "section", "index", "item")) + "\n",
+                    )
+                    self.assertEqual(render(entry, include_header=False), "")
+
     def test_delimited_fields_round_trip_with_line_breaks(self) -> None:
         items = (
             "First\rSecond",
