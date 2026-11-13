@@ -136,6 +136,11 @@ With any other format, `--no-header` reports an error with exit status 2 before
 reading the note.
 Library CSV and TSV renderers quote embedded delimiters, quotes, and line breaks
 in `DailyEntry` fields, preserving their contents. Record endings use LF.
+CSV and TSV exports do not neutralize spreadsheet formulas. If notes contain
+untrusted text, import the columns as text and disable formula evaluation in
+your spreadsheet application. CSV quoting protects field boundaries, not
+against formula execution; opening an export directly may interpret items
+beginning with characters such as `=` as formulas.
 Use `--format stats-json` or `--format stats` to output only the parsed date,
 empty state, total item count, and per-section counts.
 Use `--format compact-stats-json` or `--format compact-stats` for the same
