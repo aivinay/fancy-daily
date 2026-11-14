@@ -54,6 +54,19 @@ class DailyParserTests(unittest.TestCase):
             },
         )
 
+    def test_section_counts_are_independent_snapshots(self) -> None:
+        for source in ("", "Highlights: Shipped work\nNotes: Reviewed output"):
+            with self.subTest(source=source):
+                entry = parse_daily_note(source)
+                expected = entry.section_counts
+                counts = entry.section_counts
+                counts.clear()
+                counts["highlights"] = 999
+
+                self.assertEqual(entry.section_counts, expected)
+                self.assertEqual(entry.total_items, sum(expected.values()))
+                self.assertEqual(entry.is_empty, not any(expected.values()))
+
     def test_exposes_empty_entry_helpers(self) -> None:
         entry = parse_daily_note("Date: 2026-09-07")
 
