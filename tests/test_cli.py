@@ -1033,6 +1033,24 @@ class CliTests(unittest.TestCase):
                         stdout.flush()
                         self.assertEqual(stdout.buffer.getvalue(), b"")
 
+    def test_parse_command_reports_stdout_write_errors(self) -> None:
+        for output_arguments in ([], ["--output", "-"]):
+            with self.subTest(output=output_arguments):
+                stdout = io.StringIO()
+                stderr = io.StringIO()
+                with (
+                    patch("sys.stdin", io.StringIO("Notes: Kept work")),
+                    redirect_stdout(stdout),
+                    redirect_stderr(stderr),
+                    patch.object(stdout, "write", side_effect=OSError("device unavailable")),
+                    self.assertRaises(SystemExit) as raised,
+                ):
+                    main(["parse", *output_arguments])
+
+                self.assertEqual(raised.exception.code, 2)
+                self.assertIn("unable to write stdout: device unavailable", stderr.getvalue())
+                self.assertEqual(stdout.getvalue(), "")
+
     def test_parse_command_writes_json_to_ascii_stdout(self) -> None:
         with io.TextIOWrapper(io.BytesIO(), encoding="ascii") as stdout:
             with (
