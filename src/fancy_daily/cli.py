@@ -156,7 +156,7 @@ def main(argv: Sequence[str] | None = None) -> None:
                     f"unable to encode stdout using {exc.encoding}: {exc.reason}; "
                     "use --output for a UTF-8 file"
                 )
-            except OSError as exc:
+            except (OSError, ValueError) as exc:
                 parser.error(f"unable to write stdout: {exc}")
 
 
