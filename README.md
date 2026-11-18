@@ -275,6 +275,16 @@ date is `None`. Parsing does not enforce CLI options such as `--strict` or
 return strings without writing to files or stdout. For JSON, serialize
 `dataclasses.asdict(entry)` with `json.dumps`.
 
+Markdown and text summaries are presentation formats, not lossless serialization.
+Item Markdown is retained rather than escaped. Parsing a rendered summary again
+can interpret item text as section labels, dates, comments, or code fences.
+Multiline items supplied directly to `DailyEntry` are indented for display, but
+the line-oriented parser reads their continuation lines as separate items.
+For example, one note containing `First line\nSecond line` becomes two notes
+when its Markdown summary is parsed again. Use JSON when preserving the exact
+entry fields and item boundaries is required; `parse_daily_note` does not read
+that JSON representation.
+
 ## Development
 
 Run the test suite with:
