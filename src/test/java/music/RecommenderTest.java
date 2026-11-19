@@ -1,0 +1,109 @@
+package music;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public final class RecommenderTest {
+    private static final Track SEED = new Track("seed", "Night Train", "North", "Jazz");
+    private static final Track PEER = new Track("peer", "Daylight", "West", "Soul");
+    private static final Track GENRE = new Track("genre", "Skyline", "South", "jazz");
+    private static final Track ARTIST = new Track("artist", "Tide", "NORTH", "Pop");
+    private static final Track HIT = new Track("hit", "Cloud", "East", "Rock");
+
+    public static void main(String[] args) {
+        ranksForNewListeners();
+        matchesGenreAndArtist();
+        accountsForRepeatListens();
+        discoversSongsThroughSimilarListeners();
+        handlesEmptyResultsAndInvalidLimits();
+        System.out.println("Recommender tests passed");
+    }
+
+    private static Recommender model(List<Track> tracks, List<Listening> history) {
+        return new Recommender(new MusicData(tracks, history));
+    }
+
+    private static void ranksForNewListeners() {
+        var engine = model(List.of(HIT, GENRE, PEER, SEED), List.of(
+                new Listening("a", "seed", 3), new Listening("b", "seed", 4),
+                new Listening("a", "hit", 6)));
+        var result = engine.recommend("new", 4);
+        equal(List.of("seed", "hit", "genre", "peer"), ids(result));
+        close(1.0, result.get(0).score());
+        close(Math.log1p(6) / Math.log1p(7), result.get(1).score());
+        close(0.0, result.get(2).score());
+        equal(List.of("seed"), ids(engine.recommend("new", 1)));
+    }
+
+    private static void matchesGenreAndArtist() {
+        var engine = model(List.of(HIT, ARTIST, SEED, GENRE), List.of(
+                new Listening("me", "seed", 7), new Listening("stranger", "hit", 100)));
+        var result = engine.recommend("me", 10);
+        // The stranger shares no tracks with me, so the hit gets only its popularity score.
+        equal(List.of("genre", "artist", "hit"), ids(result));
+        close(0.25, result.get(0).score());
+        close(0.20, result.get(1).score());
+        close(0.10, result.get(2).score());
+        equal("Matches a genre you play: jazz", result.get(0).reason());
+        equal("More from an artist you play: NORTH", result.get(1).reason());
+    }
+
+    private static void accountsForRepeatListens() {
+        Track rock = new Track("rock", "Another Cloud", "Coast", "Rock");
+        var engine = model(List.of(SEED, HIT, GENRE, rock), List.of(
+                new Listening("me", "seed", 7), new Listening("me", "hit", 1)));
+        var result = engine.recommend("me", 2);
+        // log(1 + 7) is three times log(1 + 1), giving jazz three quarters of the profile.
+        equal(List.of("genre", "rock"), ids(result));
+        close(0.25 * 0.75, result.get(0).score());
+        close(0.25 * 0.25, result.get(1).score());
+    }
+
+    private static void discoversSongsThroughSimilarListeners() {
+        var tracks = new ArrayList<>(List.of(HIT, GENRE, PEER, SEED));
+        var plays = new ArrayList<>(List.of(new Listening("me", "seed", 1),
+                new Listening("neighbor", "seed", 10), new Listening("neighbor", "peer", 10),
+                new Listening("stranger", "hit", 20)));
+        var ranked = model(tracks, plays).recommend("me", 3);
+        equal(List.of("peer", "genre", "hit"), ids(ranked));
+        equal("Played by listeners with similar taste", ranked.get(0).reason());
+        close(0.45 * 0.5 + 0.10 * Math.log1p(10) / Math.log1p(20), ranked.get(0).score());
+
+        Collections.reverse(tracks);
+        Collections.reverse(plays);
+        equal(ranked, model(tracks, plays).recommend("me", 3));
+    }
+
+    private static void handlesEmptyResultsAndInvalidLimits() {
+        var emptyHistory = model(List.of(SEED, HIT), List.of());
+        var unexplored = emptyHistory.recommend("new", 20);
+        equal(List.of("hit", "seed"), ids(unexplored));
+        close(0.0, unexplored.get(0).score());
+        equal(List.of(), model(List.of(), List.of()).recommend("new", 2));
+        equal(List.of(), model(List.of(SEED), List.of(new Listening("me", "seed", 1)))
+                .recommend("me", 3));
+        try {
+            emptyHistory.recommend("new", 0);
+            throw new AssertionError("Accepted a zero limit");
+        } catch (IllegalArgumentException expected) {
+            // The caller must supply a positive limit.
+        }
+    }
+
+    private static List<String> ids(List<Recommender.Recommendation> recommendations) {
+        return recommendations.stream().map(r -> r.track().id()).toList();
+    }
+
+    private static void equal(Object expected, Object actual) {
+        if (!expected.equals(actual)) {
+            throw new AssertionError("Expected " + expected + ", got " + actual);
+        }
+    }
+
+    private static void close(double expected, double actual) {
+        if (!Double.isFinite(actual) || Math.abs(expected - actual) > 1e-9) {
+            throw new AssertionError("Expected " + expected + ", got " + actual);
+        }
+    }
+}

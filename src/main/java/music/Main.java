@@ -1,0 +1,118 @@
+package music;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Locale;
+
+public final class Main {
+    private static final String USAGE = """
+            Usage: java -jar music-recommender.jar <command> [options]
+
+              recommend USER    Rank unheard tracks for a listener
+              evaluate          Compare personalized and popularity rankings
+
+            Options:
+              --limit N         Maximum recommendations (default 5)
+              --tracks FILE     Track catalog (default examples/tracks.tsv)
+              --listens FILE    Listening history (default examples/listens.tsv)
+              --help            Show usage
+            """;
+
+    private Main() {}
+
+    public static void main(String[] args) {
+        System.exit(run(args, System.out, System.err));
+    }
+
+    static int run(String[] args, PrintStream out, PrintStream err) {
+        if (args.length == 0 || Arrays.asList(args).contains("--help")) {
+            out.print(USAGE);
+            return 0;
+        }
+
+        try {
+            String user = null;
+            int next = 1;
+            switch (args[0]) {
+                case "recommend" -> {
+                    if (args.length < 2 || args[1].isBlank() || args[1].startsWith("--")) {
+                        throw new IllegalArgumentException("recommend requires a listener ID");
+                    }
+                    user = args[next++];
+                }
+                case "evaluate" -> { }
+                default -> throw new IllegalArgumentException("unknown command: " + args[0]);
+            }
+
+            Path tracks = Path.of("examples", "tracks.tsv");
+            Path listens = Path.of("examples", "listens.tsv");
+            int limit = 5;
+            while (next < args.length) {
+                String option = args[next++];
+                if (next == args.length || args[next].startsWith("--")) {
+                    throw new IllegalArgumentException("missing value for " + option);
+                }
+                String value = args[next++];
+                switch (option) {
+                    case "--tracks" -> tracks = Path.of(value);
+                    case "--listens" -> listens = Path.of(value);
+                    case "--limit" -> limit = parseLimit(value);
+                    default -> throw new IllegalArgumentException("unknown option: " + option);
+                }
+            }
+
+            MusicData data = MusicData.load(tracks, listens);
+            if (user == null) {
+                printEvaluation(Evaluator.evaluate(data, limit), limit, out);
+            } else {
+                var picks = new Recommender(data).recommend(user, limit);
+                if (picks.isEmpty()) {
+                    out.println("No unheard tracks available.");
+                } else {
+                    out.println("rank\tid\ttitle\tartist\tgenre\tscore\treason");
+                    int rank = 0;
+                    for (var pick : picks) {
+                        Track track = pick.track();
+                        out.printf(Locale.ROOT, "%d\t%s\t%s\t%s\t%s\t%.3f\t%s%n",
+                                ++rank, track.id(), track.title(), track.artist(), track.genre(),
+                                pick.score(), pick.reason());
+                    }
+                }
+            }
+            return 0;
+        } catch (IllegalArgumentException e) {
+            err.println("Error: " + e.getMessage());
+            return 2;
+        } catch (IOException e) {
+            err.println("Could not read music data: " + e.getMessage());
+            return 1;
+        }
+    }
+
+    private static int parseLimit(String value) {
+        try {
+            int limit = Integer.parseInt(value);
+            if (limit > 0) {
+                return limit;
+            }
+        } catch (NumberFormatException ignored) {
+            // Non-numeric and out-of-range values get the same usage hint.
+        }
+        throw new IllegalArgumentException("--limit requires a positive integer");
+    }
+
+    private static void printEvaluation(Evaluator.Report report, int limit, PrintStream out) {
+        if (report.listeners() == 0) {
+            out.println("Evaluation requires a listener with at least two distinct tracks.");
+            return;
+        }
+        out.println("Evaluated listeners: " + report.listeners());
+        out.printf("model\thit_rate@%d\tmrr@%d%n", limit, limit);
+        out.printf(Locale.ROOT, "personalized\t%.3f\t%.3f%n",
+                report.hitRate(), report.meanReciprocalRank());
+        out.printf(Locale.ROOT, "popularity\t%.3f\t%.3f%n",
+                report.popularityHitRate(), report.popularityMeanReciprocalRank());
+    }
+}

@@ -1,303 +1,78 @@
-# Fancy Daily
+# Music Recommender
 
-Fancy Daily is a local-first daily note parser and summary helper. It turns a
-plain text daily log into structured JSON or clean Markdown so the same note can
-be used for personal review, weekly summaries, or lightweight status reporting.
+A Java 17 library and command-line app that recommends songs a listener has yet to play. It combines listening habits, artist and genre preferences, and the tastes of similar listeners. Every result includes a score and a reason.
 
-## Installation
+## Run the demo
 
-Requires Python 3.10 or later. On macOS or Linux, run these commands from the
-repository root to install into a virtual environment:
+You need a JDK (17 or newer) and Make. Run these commands from the repository root. The build uses the JDK alone, and the demo includes 14 fictional songs and six listeners.
 
-```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install .
+```sh
+make build
+java -jar build/music-recommender.jar recommend maya --limit 5
 ```
 
-Run the installed CLI without setting `PYTHONPATH` or activating the environment:
+Maya has played two breakbeat songs. Her top pick is **Last Train in Violet**, another track by Copper Meridian. She also gets **Paper Constellation**, a jazz track played by people who share her taste in breakbeat. **Dawn at Switchpoint** makes the list through its artist and genre even though it has zero plays.
 
-```bash
-.venv/bin/fancy-daily --version
-.venv/bin/fancy-daily parse --strict --format markdown examples/daily-note.txt
+```sh
+# See how the ranking changes for a first-time listener
+java -jar build/music-recommender.jar recommend newcomer --limit 3
+
+# Evaluate against a popularity baseline
+java -jar build/music-recommender.jar evaluate --limit 3
+
+# Build the JAR and run the test suite
+make test
 ```
 
-Alternatively, invoke the same CLI through the environment's Python:
+## Supply your own music
 
-```bash
-.venv/bin/python -m fancy_daily parse --strict examples/daily-note.txt
+Pass a track catalog and aggregated play counts as UTF-8 tab-separated files. The defaults are [examples/tracks.tsv](examples/tracks.tsv) and [examples/listens.tsv](examples/listens.tsv), relative to the working directory.
+
+| File | Header fields, in order | Each row represents |
+| --- | --- | --- |
+| Tracks | `id`, `title`, `artist`, `genre` | One song with a unique ID |
+| Listens | `user_id`, `track_id`, `plays` | One listener's total plays of one catalog track |
+
+Use the exact headers with a tab between fields. Every field is required. Counts must be positive 32-bit integers. IDs are case-sensitive. A listening file containing only the header is valid.
+
+```sh
+java -jar build/music-recommender.jar recommend listener-42 \
+  --tracks /path/to/tracks.tsv --listens /path/to/listens.tsv --limit 10
 ```
 
-On Windows, use `.venv\Scripts\python.exe` and `.venv\Scripts\fancy-daily.exe`
-for the environment's executables. Re-run the install command after changing
-source files to update the installed copy.
+## Ranking
 
-## Note Format
+The engine excludes tracks the listener has already played. For each remaining track it computes a weighted sum. The explanation names the largest contribution.
 
-Daily notes are plain text with optional sections:
+| Weight | Signal | Calculation |
+| ---: | --- | --- |
+| 45% | Similar listeners | Cosine similarity on log-weighted play counts. Each neighbor contributes its similarity times its normalized weight for the candidate. Divide the sum by the total similarity, with a minimum divisor of one. |
+| 25% | Genre | Share of the listener's log-weighted plays in the track's genre |
+| 20% | Artist | Share of the listener's log-weighted plays for the track's artist |
+| 10% | Popularity | Log of one plus total track plays, divided by the same value for the most-played track |
 
-```text
-Date: 2026-07-02
+Log weighting uses `log(1 + plays)` to soften the influence of repeated plays. Artist and genre matching ignore case. A new listener gets the popularity ranking with ties broken by track ID. With an empty history every score is zero. The model runs in memory and scans listening history and the catalog for each personalized request.
 
-Highlights:
-- Shipped the markdown renderer
-1. Added CLI output support
+## Evaluate recommendations
 
-Blockers:
-- Waiting on design feedback
+`evaluate --limit K` hides one track per listener who has played at least two distinct tracks. It sorts each listener's track IDs and uses the listener ID to seed a reproducible choice. Both rankings use the same training data with all held-out plays removed. Both exclude tracks the listener still has in training.
 
-Actions: Add examples for weekly review
+**HitRate@K** is the fraction of eligible listeners whose hidden track appears in their top K. **MRR@K** averages the reciprocal of its rank, counting a miss as zero. This split measures recovery of a known interest. Predicting the next play would require timestamped history.
 
-Notes:
-Keep the format easy to write by hand.
+## Use from Java
+
+Add `build/music-recommender.jar` to your classpath. A single model can serve multiple listeners from the same snapshot.
+
+```java
+import java.nio.file.Path;
+import music.MusicData;
+import music.Recommender;
+
+// Inside a method that can throw IOException:
+var data = MusicData.load(Path.of("examples/tracks.tsv"), Path.of("examples/listens.tsv"));
+var model = new Recommender(data);
+
+for (var pick : model.recommend("maya", 5)) {
+    System.out.println(pick.track().title() + " — " + pick.reason());
+}
 ```
-
-Supported sections are:
-
-- `Highlights`, `Highlight`, `Wins`, `Accomplishments`, `Accomplishment`,
-  `Outcomes`, `Outcome`, `Milestones`, `Milestone`, `Progress`, or `Done`
-- `Blockers`, `Blocker`, `Risks`, `Risk`, `Issues`, `Issue`, `Challenges`,
-  `Challenge`, `Obstacles`, `Obstacle`, `Problems`, `Problem`, `Concerns`,
-  `Concern`, `Delays`, `Delay`, `Dependencies`, `Dependency`, `Escalations`,
-  `Escalation`, `Impediments`, `Impediment`, or `Stuck`
-- `Follow-ups`, `Follow-up`, `Follow ups`, `Followups`, `Actions`,
-  `Action items`, `Next action`, `Next actions`, `Next steps`, `Tasks`,
-  `Task`, `To do`, `Todo`, or `Todos`
-- `Notes`, `Note`, `Reflections`, `Reflection`, `Thoughts`, `Thought`,
-  `Lessons`, `Lesson`, `Learnings`, `Learning`, `Ideas`, `Idea`, `Decisions`,
-  `Decision`, `Summaries`, `Summary`, `Reviews`, `Review`, `Retrospectives`,
-  `Retrospective`, `Questions`, `Question`, `Gratitude`, `Thanks`
-
-Section labels may be written on their own line or inline with a value, such as
-`Highlights: Finished the parser update`. Unlabeled lines are treated as notes.
-Markdown emphasis around section labels is ignored, so labels such as
-`**Highlights:**`, `_Follow-ups:_`, and `` `Notes`: `` are recognized.
-Section headings may include closing hashes, such as `## Highlights ##`.
-Markers belonging to an inline value, such as `_config`, `` `command` ``, or
-`**Important**`, are preserved.
-Dates may be written as `Date: 2026-07-02`, as a plain `2026-07-02` line, or as
-a Markdown heading such as `# 2026-07-02`. Date labels, plain date lines, and
-date headings may include trailing title text, such as `# 2026-07-02 Friday
-Review`.
-Quoted date values are also accepted, including dates read from YAML front
-matter.
-ISO 8601 timestamps such as `2026-07-02T09:30:00Z` are normalized to their
-calendar date. Date and timestamp values must be valid; invalid values leave
-the parsed date unset.
-Bullet items using `-`, `*`, `+`, `1.`, or `1)` are normalized before rendering.
-Spaces or tabs may separate a list marker from its text.
-Markdown task list markers like `[ ]`, `[x]`, and `[X]` are also removed from
-parsed items. Empty bullet or checkbox placeholders are ignored.
-This includes bare `-`, `*`, and `+` bullets and numbered placeholders such as
-`1.` and `2)`. Placeholders do not count toward entry limits or satisfy
-`--require-entry` or `--strict`.
-Markdown horizontal rules such as `---`, `***`, `___`, and spaced forms like
-`- - -` are ignored. Spaces and tabs may separate the rule's markers.
-HTML comments are ignored, including multi-line template guidance and comments
-appended to otherwise visible items.
-An unclosed comment is ignored through the end of the note. Comment markers
-inside fenced code are literal examples and do not hide surrounding note text;
-likewise, fences inside comments do not start code blocks.
-Fenced Markdown code blocks are ignored, so examples inside them do not create
-items or change sections. A closing fence must use the same marker character,
-be at least as long as its opening fence, and have no trailing text other than
-whitespace. An unclosed code block is ignored through the end of the note.
-Markdown blockquote prefixes are removed before parsing, so quoted dates,
-section labels, and list items work like their unquoted forms.
-YAML front matter at the start of a note is ignored except for its top-level
-`date` field, which is used as the entry date. Dates inside nested metadata do
-not set the entry date.
-
-## Usage
-
-Run the parser from a checkout with:
-
-```bash
-PYTHONPATH=src python3 -m fancy_daily.cli parse daily.txt
-```
-
-Render Markdown instead of JSON:
-
-```bash
-PYTHONPATH=src python3 -m fancy_daily.cli parse --format markdown daily.txt
-```
-
-Use `--format md` for the same Markdown output with a shorter option value.
-Use `--format text`, `--format txt`, or `--format plain` for a plain
-terminal-friendly summary.
-Use `--format pretty-json` or `--format pretty` to request indented JSON
-explicitly.
-Use `--format compact-json` or `--format compact` for single-line JSON output
-in scripts or logs.
-Use `--format csv` for spreadsheet-friendly rows with `date`, `section`,
-`index`, and `item` columns.
-Use `--format tsv` for the same row layout with tab-separated columns.
-Add `--no-header` with `csv` or `tsv` when appending rows to an existing file.
-With any other format, `--no-header` reports an error with exit status 2 before
-reading the note.
-Library CSV and TSV renderers quote embedded delimiters, quotes, and line breaks
-in `DailyEntry` fields, preserving their contents. Record endings use LF.
-CSV and TSV exports do not neutralize spreadsheet formulas. If notes contain
-untrusted text, import the columns as text and disable formula evaluation in
-your spreadsheet application. CSV quoting protects field boundaries, not
-against formula execution; opening an export directly may interpret items
-beginning with characters such as `=` as formulas.
-Use `--format stats-json` or `--format stats` to output only the parsed date,
-empty state, total item count, and per-section counts.
-Use `--format compact-stats-json` or `--format compact-stats` for the same
-stats payload as single-line JSON in scripts or logs.
-
-Check the installed CLI version:
-
-```bash
-fancy-daily --version
-```
-
-Try the included example note:
-
-```bash
-PYTHONPATH=src python3 -m fancy_daily.cli parse --format markdown examples/daily-note.txt
-```
-
-For a Markdown template with front matter, task lists, comments, and fenced
-examples, try:
-
-```bash
-fancy-daily parse --strict --format markdown examples/daily-note.md
-```
-
-Its summary contains two highlights, two follow-ups, and one note. The empty
-blocker checkbox, template comments, metadata, and fenced example are excluded.
-
-Pipe a note through standard input by using `-` as the file path:
-
-```bash
-cat daily.txt | PYTHONPATH=src python3 -m fancy_daily.cli parse -
-```
-
-When no file path is provided, `parse` also reads from standard input.
-Note files must be UTF-8 encoded. A single leading byte-order mark (BOM) is
-ignored for file, stdin, and library input.
-Missing files, invalid file encoding, and stdin read or decoding failures are
-reported as command-line errors with exit status 2 instead of Python tracebacks.
-Undecodable bytes preserved by stdin's `surrogateescape` mode are rejected before
-parsing or rendering, rather than copied into summaries.
-Failed input reads do not write to the output file.
-Use `--require-date` when a pipeline should reject notes that do not include a
-parseable date.
-Use `--require-entry` when a pipeline should reject dated but otherwise empty
-notes.
-Use `--strict` as a shortcut for requiring both a parseable date and at least
-one parsed entry.
-Use `--require-section highlights` to require a specific parsed section; repeat
-the option to require multiple sections.
-Use `--min-items 3` when a pipeline should require a minimum number of parsed
-entries.
-Use `--max-items 10` when a pipeline should reject notes that exceed an entry
-limit. When used together, the minimum cannot exceed the maximum.
-
-Write output to a file:
-
-```bash
-PYTHONPATH=src python3 -m fancy_daily.cli parse \
-  --format markdown \
-  -o reports/daily/summary.md \
-  daily.txt
-```
-
-Missing parent directories for `--output` are created automatically.
-Use `--output -` to write to stdout explicitly.
-Only the literal `-` selects stdout; use `--output ./-` to write a file named `-`.
-If stdout's encoding cannot represent the summary, the CLI reports an error
-with exit status 2. Use `--output` with a file path to write UTF-8 output.
-Output write failures are reported as command-line errors instead of Python
-tracebacks.
-
-For automated reports, validate before replacing the previous summary:
-
-```bash
-fancy-daily parse --strict --require-section highlights \
-  --format compact-json --output reports/daily.json daily.txt
-```
-
-A successful parse exits with status 0. Validation failures exit with status 2,
-write diagnostics to stderr, and leave an existing `--output` file unchanged.
-Prefer `--output` over `> reports/daily.json` here: the shell truncates a redirected
-file before the CLI can validate the note. File writes themselves are not atomic;
-an interrupted or failed write can still leave a partial report.
-
-When a note has a date but no section entries, Markdown output keeps the date
-heading and renders `_No entries recorded._` so empty daily logs are explicit.
-Library callers can use `DailyEntry.is_empty`, `DailyEntry.total_items`, and
-`DailyEntry.section_counts` for quick summary checks after parsing.
-
-## Parsing Model
-
-Each nonempty content line becomes one item in the current section. Wrapped
-paragraphs are not joined, and indentation does not preserve nested-list
-relationships. This is a lightweight note parser, not a full Markdown or YAML
-document processor.
-
-Checked and unchecked tasks are both included. Checkbox state and list numbering
-are discarded; they do not filter completed work or supply separate status fields.
-For example:
-
-```text
-Follow-ups:
-- [x] Send summary
-- [ ] Confirm owner
-```
-
-This produces `follow_ups` containing `Send summary` and `Confirm owner`, in that
-order. Use separate sections or keep status in the item text when it must survive
-parsing. An empty checkbox is a placeholder and contributes no item.
-
-## Python Library
-
-After installation, import the public API directly:
-
-```python
-from fancy_daily import parse_daily_note, render_markdown
-
-entry = parse_daily_note("Date: 2026-10-27\nHighlights: Shipped the update")
-assert entry.date == "2026-10-27"
-assert entry.highlights == ("Shipped the update",)
-assert entry.total_items == 1
-print(render_markdown(entry), end="")
-```
-
-`parse_daily_note` accepts text, not a file path. For a file, pass
-`Path("daily.txt").read_text(encoding="utf-8")` from `pathlib` instead.
-It returns a frozen `DailyEntry` with tuple-valued sections; an absent or invalid
-date is `None`. Parsing does not enforce CLI options such as `--strict` or
-`--require-section`: library callers must check the returned fields themselves.
-
-`render_text`, `render_csv`, and `render_tsv` are also public exports. Renderers
-return strings without writing to files or stdout. For JSON, serialize
-`dataclasses.asdict(entry)` with `json.dumps`.
-
-Markdown and text summaries are presentation formats, not lossless serialization.
-Item Markdown is retained rather than escaped. Parsing a rendered summary again
-can interpret item text as section labels, dates, comments, or code fences.
-Multiline items supplied directly to `DailyEntry` are indented for display, but
-the line-oriented parser reads their continuation lines as separate items.
-For example, one note containing `First line\nSecond line` becomes two notes
-when its Markdown summary is parsed again. Use JSON when preserving the exact
-entry fields and item boundaries is required; `parse_daily_note` does not read
-that JSON representation.
-
-## Development
-
-Run the test suite with:
-
-```bash
-PYTHONPATH=src python3 -m unittest discover -s tests
-```
-
-CI builds and installs the package without editable mode on Python 3.10, 3.11,
-and 3.12. It runs the tests in isolated mode against the installed package and
-checks the installed `fancy-daily` command with both example notes. The Markdown
-template is also parsed through `python -I -m fancy_daily` to verify the installed
-package entry point without importing source files from the checkout.
-
-The project is intentionally growing in small increments so each change stays
-reviewable and useful.
