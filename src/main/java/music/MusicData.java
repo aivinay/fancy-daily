@@ -1,0 +1,106 @@
+package music;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+
+/** A snapshot of the catalog and its aggregated listening history. */
+public record MusicData(List<Track> tracks, List<Listening> history) {
+    public MusicData {
+        tracks = List.copyOf(tracks);
+        history = List.copyOf(history);
+        Set<String> trackIds = new HashSet<>();
+        for (int i = 0; i < tracks.size(); i++) {
+            String id = tracks.get(i).id();
+            if (!trackIds.add(id)) {
+                throw new InvalidRow(true, i, "Duplicate track ID '" + id + "'");
+            }
+        }
+        Set<UserTrack> seen = new HashSet<>();
+        for (int i = 0; i < history.size(); i++) {
+            Listening row = history.get(i);
+            if (!trackIds.contains(row.trackId())) {
+                throw new InvalidRow(false, i, "Unknown track ID '" + row.trackId() + "'");
+            }
+            if (!seen.add(new UserTrack(row.userId(), row.trackId()))) {
+                throw new InvalidRow(false, i, "Duplicate history for user '" + row.userId()
+                        + "' and track '" + row.trackId() + "'");
+            }
+        }
+    }
+
+    private record UserTrack(String userId, String trackId) {}
+
+    private static final class InvalidRow extends IllegalArgumentException {
+        private static final long serialVersionUID = 1L;
+        final boolean inCatalog;
+        final int line;
+
+        InvalidRow(boolean inCatalog, int index, String message) {
+            super(message);
+            this.inCatalog = inCatalog;
+            this.line = index + 2; // The first line contains the table header.
+        }
+    }
+
+    public static MusicData load(Path catalog, Path history) throws IOException {
+        List<Track> tracks = readTable(catalog, "id\ttitle\tartist\tgenre",
+                fields -> new Track(fields[0], fields[1], fields[2], fields[3]));
+        List<Listening> events = readTable(history, "user_id\ttrack_id\tplays",
+                fields -> new Listening(fields[0], fields[1], parsePlays(fields[2])));
+        try {
+            return new MusicData(tracks, events);
+        } catch (InvalidRow error) {
+            Path file = error.inCatalog ? catalog : history;
+            throw new IOException(file + ":" + error.line + ": " + error.getMessage(), error);
+        }
+    }
+
+    private static int parsePlays(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException error) {
+            throw new IllegalArgumentException("Expected a positive integer for plays, found '" + value + "'", error);
+        }
+    }
+
+    private static <T> List<T> readTable(Path path, String header, Function<String[], T> parseRow)
+            throws IOException {
+        String[] columns = header.split("\t");
+        List<T> rows = new ArrayList<>();
+        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+            String firstLine = reader.readLine();
+            if (!header.equals(firstLine) && !("\uFEFF" + header).equals(firstLine)) {
+                throw new IOException(path + ":1: Expected tab-separated header " + String.join(", ", columns));
+            }
+            String line;
+            int lineNumber = 1;
+            while ((line = reader.readLine()) != null) {
+                lineNumber++;
+                String[] fields = line.split("\t", -1);
+                try {
+                    if (fields.length != columns.length) {
+                        throw new IllegalArgumentException("Expected " + columns.length + " tab-separated fields");
+                    }
+                    for (int i = 0; i < fields.length; i++) {
+                        fields[i] = fields[i].strip();
+                        if (fields[i].isEmpty()) {
+                            throw new IllegalArgumentException("Missing " + columns[i]);
+                        }
+                    }
+                    rows.add(parseRow.apply(fields));
+                } catch (IllegalArgumentException error) {
+                    throw new IOException(path + ":" + lineNumber + ": " + error.getMessage(), error);
+                }
+            }
+        }
+        return rows;
+    }
+}
