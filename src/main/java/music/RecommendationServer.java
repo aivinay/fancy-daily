@@ -8,9 +8,32 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-final class RecommendationServer {
-    static HttpServer start(Recommender model, int port, int defaultLimit) throws IOException {
+final class RecommendationServer implements AutoCloseable {
+    private final HttpServer server;
+    private final ThreadPoolExecutor workers;
+
+    private RecommendationServer(HttpServer server) {
+        this.server = server;
+        workers = new ThreadPoolExecutor(2, 2, 0, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(32), new ThreadPoolExecutor.CallerRunsPolicy());
+        server.setExecutor(workers);
+    }
+
+    int port() {
+        return server.getAddress().getPort();
+    }
+
+    @Override
+    public void close() {
+        server.stop(0);
+        workers.shutdownNow();
+    }
+
+    static RecommendationServer start(Recommender model, int port, int defaultLimit) throws IOException {
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 0);
         server.createContext("/recommendations", exchange -> {
             try {
@@ -26,8 +49,9 @@ final class RecommendationServer {
                 exchange.close();
             }
         });
+        var service = new RecommendationServer(server);
         server.start();
-        return server;
+        return service;
     }
 
     private static void handle(HttpExchange exchange, Recommender model, int limit) throws IOException {
