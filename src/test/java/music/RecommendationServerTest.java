@@ -5,6 +5,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +27,20 @@ public final class RecommendationServerTest {
             }
             for (String limit : new String[]{"", "three", "2147483648"}) {
                 assertBadRequest(client, server.port(), "?user=maya&limit=" + limit, "limit requires a positive integer");
+            }
+        }
+        assertEscapedTitle();
+    }
+
+    private static void assertEscapedTitle() throws Exception {
+        var track = new Track("t1", "Café \"Live\" \\ Encore", "Artist", "Jazz");
+        var model = new Recommender(new MusicData(List.of(track), List.of()));
+        try (var server = RecommendationServer.start(model, 0, 1)) {
+            var response = request(HttpClient.newHttpClient(), server.port(), "?user=new")
+                    .get(10, TimeUnit.SECONDS);
+            String expectedTitle = "\"title\":\"Café \\\"Live\\\" \\\\ Encore\"";
+            if (response.statusCode() != 200 || !response.body().contains(expectedTitle)) {
+                throw new AssertionError("Unexpected JSON title in " + response.body());
             }
         }
     }
