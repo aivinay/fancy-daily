@@ -6,6 +6,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -14,10 +15,10 @@ public final class RecommendationServerTest {
         var model = new Recommender(MusicData.load(Path.of("examples/tracks.tsv"), Path.of("examples/listens.tsv")));
         try (var server = RecommendationServer.start(model, 0, 5)) {
             var client = HttpClient.newHttpClient();
-            var maya = request(client, server.port(), "?user=maya&limit=1");
+            var maya = request(client, server.port(), "?user=maya&limit=3");
             var theo = request(client, server.port(), "?user=theo&limit=1");
-            assertPick(maya.get(10, TimeUnit.SECONDS), model.recommend("maya", 1).get(0));
-            assertPick(theo.get(10, TimeUnit.SECONDS), model.recommend("theo", 1).get(0));
+            assertRanking(maya.get(10, TimeUnit.SECONDS), model.recommend("maya", 3));
+            assertRanking(theo.get(10, TimeUnit.SECONDS), model.recommend("theo", 1));
 
             for (String query : new String[]{"", "?limit=1", "?user=", "?user=%20"}) {
                 assertBadRequest(client, server.port(), query, "User ID must not be blank");
@@ -60,13 +61,16 @@ public final class RecommendationServerTest {
         }
     }
 
-    private static void assertPick(HttpResponse<String> response, Recommender.Recommendation pick) {
-        var track = pick.track();
-        String expected = """
-                {"recommendations":[{"id":"%s","title":"%s","artist":"%s","genre":"%s","score":%s,"explanation":"%s"}]}"""
-                .formatted(track.id(), track.title(), track.artist(), track.genre(), pick.score(), pick.reason());
-        if (response.statusCode() != 200 || !expected.equals(response.body())) {
-            throw new AssertionError("Unexpected response: " + response);
+    private static void assertRanking(HttpResponse<String> response, List<Recommender.Recommendation> picks) {
+        var expected = new StringJoiner(",", "{\"recommendations\":[", "]}");
+        for (var pick : picks) {
+            var track = pick.track();
+            expected.add("""
+                    {"id":"%s","title":"%s","artist":"%s","genre":"%s","score":%s,"explanation":"%s"}"""
+                    .formatted(track.id(), track.title(), track.artist(), track.genre(), pick.score(), pick.reason()));
+        }
+        if (response.statusCode() != 200 || !expected.toString().equals(response.body())) {
+            throw new AssertionError("Expected " + expected + " but got " + response + " " + response.body());
         }
     }
 }
