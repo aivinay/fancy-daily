@@ -11,10 +11,12 @@ public final class Main {
             Usage: java -jar music-recommender.jar <command> [options]
 
               recommend USER    Rank unheard tracks for a listener
+              serve             Serve JSON recommendations on loopback
               evaluate          Compare personalized and popularity rankings
 
             Options:
               --limit N         Maximum recommendations (default 5)
+              --port N          HTTP port for serve (default 8080, 0 for ephemeral)
               --tracks FILE     Track catalog (default examples/tracks.tsv)
               --listens FILE    Listening history (default examples/listens.tsv)
               --help            Show usage
@@ -23,7 +25,8 @@ public final class Main {
     private Main() {}
 
     public static void main(String[] args) {
-        System.exit(run(args, System.out, System.err));
+        int status = run(args, System.out, System.err);
+        if (status != 0) System.exit(status);
     }
 
     static int run(String[] args, PrintStream out, PrintStream err) {
@@ -42,13 +45,14 @@ public final class Main {
                     }
                     user = args[next++];
                 }
-                case "evaluate" -> { }
+                case "serve", "evaluate" -> { }
                 default -> throw new IllegalArgumentException("unknown command: " + args[0]);
             }
 
             Path tracks = Path.of("examples", "tracks.tsv");
             Path listens = Path.of("examples", "listens.tsv");
             int limit = 5;
+            int port = 8080;
             while (next < args.length) {
                 String option = args[next++];
                 if (next == args.length || args[next].startsWith("--")) {
@@ -58,13 +62,30 @@ public final class Main {
                 switch (option) {
                     case "--tracks" -> tracks = Path.of(value);
                     case "--listens" -> listens = Path.of(value);
+                    case "--port" -> {
+                        if (!args[0].equals("serve")) throw new IllegalArgumentException("--port requires serve");
+                        try {
+                            port = Integer.parseInt(value);
+                            if (port < 0 || port > 65535) throw new NumberFormatException();
+                        } catch (NumberFormatException e) {
+                            throw new IllegalArgumentException("--port requires an integer from 0 to 65535");
+                        }
+                    }
                     case "--limit" -> limit = parseLimit(value);
                     default -> throw new IllegalArgumentException("unknown option: " + option);
                 }
             }
 
             MusicData data = MusicData.load(tracks, listens);
-            if (user == null) {
+            if (args[0].equals("serve")) {
+                try {
+                    var server = RecommendationServer.start(new Recommender(data), port, limit);
+                    out.println("Listening on http://127.0.0.1:" + server.getAddress().getPort());
+                } catch (IOException e) {
+                    err.println("Could not start HTTP server: " + e.getMessage());
+                    return 1;
+                }
+            } else if (user == null) {
                 printEvaluation(Evaluator.evaluate(data, limit), limit, out);
             } else {
                 var picks = new Recommender(data).recommend(user, limit);
