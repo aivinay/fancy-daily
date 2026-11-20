@@ -80,7 +80,7 @@ public final class Main {
             if (args[0].equals("serve")) {
                 try {
                     var server = RecommendationServer.start(new Recommender(data), port, limit);
-                    out.println("Listening on http://127.0.0.1:" + server.getAddress().getPort());
+                    out.println("Listening on http://127.0.0.1:" + server.port());
                 } catch (IOException e) {
                     err.println("Could not start HTTP server: " + e.getMessage());
                     return 1;
