@@ -24,6 +24,27 @@ java -jar build/music-recommender.jar evaluate --limit 3
 make test
 ```
 
+## Request recommendations over HTTP
+
+From the repository root, start the server with the example dataset. Port `0` lets the operating system choose an available loopback port.
+
+```sh
+make build
+java -jar build/music-recommender.jar serve --port 0
+```
+
+In a second terminal, paste the URL printed after `Listening on` at the prompt. This request returns Maya’s top unheard track.
+
+```sh
+printf 'Server URL: '
+read -r base_url
+curl -fsS "${base_url}/recommendations?user=maya&limit=1"
+```
+
+```json
+{"recommendations":[{"id":"t03","title":"Last Train in Violet","artist":"Copper Meridian","genre":"Breakbeat","score":0.5058485492490495,"explanation":"Matches a genre you play: Breakbeat"}]}
+```
+
 ## Supply your own music
 
 Pass a track catalog and aggregated play counts as UTF-8 tab-separated files. The defaults are [examples/tracks.tsv](examples/tracks.tsv) and [examples/listens.tsv](examples/listens.tsv), relative to the working directory.
