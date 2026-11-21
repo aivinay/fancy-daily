@@ -31,6 +31,23 @@ public final class RecommendationServerTest {
             }
         }
         assertEscapedTitle();
+        assertListenerHistoryExtremes();
+    }
+
+    private static void assertListenerHistoryExtremes() throws Exception {
+        var first = new Track("a", "First", "Artist", "Jazz");
+        var favorite = new Track("z", "Favorite", "Artist", "Jazz");
+        var history = List.of(new Listening("regular", "a", 1), new Listening("regular", "z", 9));
+        var model = new Recommender(new MusicData(List.of(first, favorite), history));
+        try (var server = RecommendationServer.start(model, 0, 1)) {
+            var client = HttpClient.newHttpClient();
+            var newcomer = request(client, server.port(), "?user=new").get(10, TimeUnit.SECONDS);
+            assertRanking(newcomer, List.of(new Recommender.Recommendation(
+                    favorite, 1.0, "Popular across listening history")));
+
+            var regular = request(client, server.port(), "?user=regular").get(10, TimeUnit.SECONDS);
+            assertRanking(regular, List.of());
+        }
     }
 
     private static void assertEscapedTitle() throws Exception {
